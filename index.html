@@ -1,0 +1,1324 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Nunito', sans-serif;
+    }
+    .tab-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      transform: scale(1.05);
+    }
+    .card-shadow {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .chore-done {
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
+    .ingredient-bought {
+      opacity: 0.5;
+      text-decoration: line-through;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in {
+      animation: slideIn 0.3s ease-out forwards;
+    }
+    .day-chip-active {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full">
+  <div id="app" class="h-full w-full bg-gradient-to-br from-slate-50 to-purple-50 flex flex-col overflow-hidden"><!-- Country Selection Screen -->
+   <div id="country-selection" class="h-full w-full flex flex-col items-center justify-center p-6">
+    <div class="bg-white rounded-3xl p-8 card-shadow max-w-md w-full animate-in">
+     <div class="text-center mb-6">
+      <div class="text-6xl mb-4">
+       🌍
+      </div>
+      <h2 class="text-2xl font-extrabold text-gray-800 mb-2">Welcome to Home Manager</h2>
+      <p class="text-gray-600 text-sm">Select your country to get started</p>
+     </div>
+     <div class="space-y-3"><button onclick="selectCountry('Kenya')" class="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl py-4 px-6 font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-between"> <span>🇰🇪 Kenya</span> <span class="text-sm font-normal opacity-90">KES</span> </button> <button onclick="selectCountry('Ivory Coast')" class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl py-4 px-6 font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-between"> <span>🇨🇮 Ivory Coast</span> <span class="text-sm font-normal opacity-90">XOF</span> </button> <button onclick="selectCountry('Cameroon')" class="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl py-4 px-6 font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-between"> <span>🇨🇲 Cameroon</span> <span class="text-sm font-normal opacity-90">XAF</span> </button> <button onclick="selectCountry('Egypt')" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl py-4 px-6 font-bold text-lg transition-all transform hover:scale-105 flex items-center justify-between"> <span>🇪🇬 Egypt</span> <span class="text-sm font-normal opacity-90">EGP</span> </button>
+     </div>
+    </div>
+   </div><!-- Main App Content (hidden initially) -->
+   <div id="main-content" class="hidden h-full w-full flex flex-col overflow-hidden"><!-- Header -->
+    <header class="bg-white card-shadow px-4 py-4 flex-shrink-0">
+     <div class="flex items-center justify-center">
+      <h1 id="app-title" class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Home Manager</h1>
+     </div>
+    </header><!-- Floating Action Buttons -->
+    <div class="fixed bottom-6 right-6 flex flex-row gap-3 z-40"><button id="country-flag" onclick="showCountrySelection()" class="w-14 h-14 rounded-full bg-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> 🌍 </button> <button onclick="openPersonalSettings()" class="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> ⚙️ </button> <button onclick="openTipsDrawer()" class="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> 💰 </button>
+    </div><!-- Tab Navigation -->
+    <nav class="flex gap-2 px-4 py-3 flex-shrink-0"><button onclick="switchTab('chores')" id="tab-chores" class="tab-active flex-1 py-2 px-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2"> <span>🧹</span><span id="chores-tab-text">Chores</span> </button> <button onclick="switchTab('meals')" id="tab-meals" class="flex-1 py-2 px-3 rounded-xl font-semibold text-sm bg-white text-gray-600 transition-all duration-300 flex items-center justify-center gap-2 card-shadow"> <span>🍽️</span><span id="meals-tab-text">Meals</span> </button> <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-2 px-3 rounded-xl font-semibold text-sm bg-white text-gray-600 transition-all duration-300 flex items-center justify-center gap-2 card-shadow"> <span>🛒</span><span id="shopping-tab-text">Shopping</span> </button>
+    </nav><!-- Content Area -->
+    <main class="flex-1 overflow-y-auto px-4 pb-24"><!-- Chores Tab -->
+     <section id="content-chores" class="space-y-3">
+      <div class="flex gap-2 overflow-x-auto pb-2 flex-wrap"><button onclick="selectChoreDay('Monday')" class="day-chip day-chip-active px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all">Mon</button> <button onclick="selectChoreDay('Tuesday')" class="day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Tue</button> <button onclick="selectChoreDay('Wednesday')" class="day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Wed</button> <button onclick="selectChoreDay('Thursday')" class="day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Thu</button> <button onclick="selectChoreDay('Friday')" class="day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Fri</button> <button onclick="selectChoreDay('Saturday')" class="day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Sat</button> <button onclick="selectChoreDay('Sunday')" class="day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Sun</button>
+      </div>
+      <div id="chores-list" class="space-y-2"></div>
+     </section><!-- Meals Tab -->
+     <section id="content-meals" class="hidden space-y-3">
+      <div class="flex gap-2 mb-3"><button onclick="setMealView('daily')" id="view-daily" class="flex-1 py-2 px-3 rounded-xl font-semibold text-sm bg-gradient-to-r from-purple-500 to-indigo-500 text-white transition-all">Daily View</button> <button onclick="setMealView('monthly')" id="view-monthly" class="flex-1 py-2 px-3 rounded-xl font-semibold text-sm bg-white text-gray-600 card-shadow transition-all">Monthly View</button>
+      </div><!-- Daily View -->
+      <div id="daily-view" class="space-y-3">
+       <div class="flex gap-2 overflow-x-auto pb-2 flex-wrap"><button onclick="selectMealDay('Monday')" class="meal-day-chip day-chip-active px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all">Mon</button> <button onclick="selectMealDay('Tuesday')" class="meal-day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Tue</button> <button onclick="selectMealDay('Wednesday')" class="meal-day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Wed</button> <button onclick="selectMealDay('Thursday')" class="meal-day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Thu</button> <button onclick="selectMealDay('Friday')" class="meal-day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Fri</button> <button onclick="selectMealDay('Saturday')" class="meal-day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Sat</button> <button onclick="selectMealDay('Sunday')" class="meal-day-chip px-3 py-1 rounded-full text-xs font-semibold bg-white text-gray-600 whitespace-nowrap transition-all">Sun</button>
+       </div>
+       <div id="meals-list" class="space-y-3"></div>
+      </div><!-- Monthly View -->
+      <div id="monthly-view" class="hidden space-y-4">
+       <div id="monthly-calendar"></div>
+      </div>
+     </section><!-- Shopping Tab -->
+     <section id="content-shopping" class="hidden space-y-3">
+      <div class="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-2xl p-4">
+       <div class="flex justify-between items-center"><span class="font-semibold text-gray-700">Items in cart:</span> <span id="cart-count" class="font-bold text-purple-700">0 / 0</span>
+       </div>
+       <div class="w-full bg-white rounded-full h-2 mt-2">
+        <div id="cart-progress" class="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+       </div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 card-shadow">
+       <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-gray-800 flex items-center gap-2"><span>🌾</span> Staples</h3><span id="staples-price" class="text-sm font-bold text-purple-600">KES 0</span>
+       </div>
+       <div id="staples-list" class="space-y-2"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 card-shadow">
+       <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-gray-800 flex items-center gap-2"><span>🥩</span> Proteins</h3><span id="proteins-price" class="text-sm font-bold text-purple-600">KES 0</span>
+       </div>
+       <div id="proteins-list" class="space-y-2"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 card-shadow">
+       <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-gray-800 flex items-center gap-2"><span>🥬</span> Vegetables</h3><span id="vegetables-price" class="text-sm font-bold text-purple-600">KES 0</span>
+       </div>
+       <div id="vegetables-list" class="space-y-2"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 card-shadow">
+       <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-gray-800 flex items-center gap-2"><span>🍌</span> Breakfast &amp; Snacks</h3><span id="breakfast-price" class="text-sm font-bold text-purple-600">KES 0</span>
+       </div>
+       <div id="breakfast-list" class="space-y-2"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 card-shadow">
+       <div class="flex justify-between items-center mb-3">
+        <h3 class="font-bold text-gray-800 flex items-center gap-2"><span>🧴</span> Cooking Basics</h3><span id="basics-price" class="text-sm font-bold text-purple-600">KES 0</span>
+       </div>
+       <div id="basics-list" class="space-y-2"></div>
+      </div>
+      <div class="bg-white rounded-2xl p-4 card-shadow border-2 border-purple-200">
+       <div class="flex justify-between items-center">
+        <h3 class="font-bold text-gray-800 text-lg">Weekly Total</h3><span id="total-price" class="text-2xl font-extrabold text-purple-600">KES 0</span>
+       </div>
+       <p class="text-xs text-gray-500 mt-1">Budget: ~KES 5,000</p>
+      </div>
+     </section>
+    </main><!-- Recipe Modal -->
+    <div id="recipe-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end justify-center">
+     <div class="bg-white w-full max-w-lg rounded-t-3xl max-h-[85%] overflow-hidden animate-in">
+      <div class="sticky top-0 bg-white px-4 py-3 border-b flex justify-between items-center">
+       <h3 id="modal-title" class="font-bold text-lg text-gray-800">Recipe</h3><button onclick="closeRecipeModal()" class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:bg-gray-200 transition-colors">✕</button>
+      </div>
+      <div id="modal-content" class="p-4 overflow-y-auto" style="max-height: calc(85vh - 60px);"></div>
+     </div>
+    </div><!-- Tips Drawer -->
+    <div id="tips-drawer" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end justify-center">
+     <div class="bg-white w-full max-w-lg rounded-t-3xl max-h-[85%] overflow-hidden animate-in">
+      <div class="sticky top-0 bg-gradient-to-r from-green-500 to-emerald-500 px-4 py-4">
+       <div class="flex justify-between items-center">
+        <div>
+         <h3 class="font-bold text-xl text-white flex items-center gap-2"><span>💰</span> Send Tips</h3>
+         <p class="text-sm text-white/90 mt-1">Support this meal planning service!</p>
+        </div><button onclick="closeTipsDrawer()" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition-colors text-xl">✕</button>
+       </div>
+      </div>
+      <div id="tips-drawer-content" class="p-4 overflow-y-auto space-y-3" style="max-height: calc(85vh - 100px);"></div>
+     </div>
+    </div><!-- Password Login Modal -->
+    <div id="password-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+     <div class="bg-white rounded-3xl p-6 max-w-md w-full animate-in card-shadow">
+      <div class="text-center mb-6">
+       <div class="text-5xl mb-3">
+        🔒
+       </div>
+       <h3 class="font-bold text-xl text-gray-800 mb-2">Personal Settings</h3>
+       <p class="text-sm text-gray-600">Enter your password to continue</p>
+      </div>
+      <form id="password-form" onsubmit="handlePasswordSubmit(event)" class="space-y-4">
+       <div><label for="password-input" class="block text-sm font-semibold text-gray-700 mb-2">Password</label> <input type="password" id="password-input" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-colors" placeholder="Enter password" required>
+       </div>
+       <div id="password-error" class="hidden text-sm text-red-600 text-center bg-red-50 p-2 rounded-lg"></div>
+       <div class="flex gap-3"><button type="button" onclick="closePasswordModal()" class="flex-1 py-3 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"> Cancel </button> <button type="submit" class="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all transform hover:scale-105"> Login </button>
+       </div>
+      </form>
+      <div id="first-time-setup" class="hidden mt-4 pt-4 border-t border-gray-200">
+       <p class="text-xs text-gray-600 text-center mb-3">First time? Set up your password:</p>
+       <form id="setup-form" onsubmit="handleSetupPassword(event)" class="space-y-3"><input type="password" id="setup-password" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Create password" required> <input type="password" id="setup-confirm" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Confirm password" required> <button type="submit" class="w-full py-2 px-4 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-sm transition-all"> Set Password </button>
+       </form>
+      </div>
+     </div>
+    </div><!-- Personal Settings Drawer -->
+    <div id="settings-drawer" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end justify-center">
+     <div class="bg-white w-full max-w-lg rounded-t-3xl max-h-[90%] overflow-hidden animate-in">
+      <div class="sticky top-0 bg-gradient-to-r from-indigo-500 to-purple-500 px-4 py-4">
+       <div class="flex justify-between items-center">
+        <div>
+         <h3 class="font-bold text-xl text-white flex items-center gap-2"><span>⚙️</span> Personal Settings</h3>
+         <p class="text-sm text-white/90 mt-1">Manage your chores, meals &amp; shopping</p>
+        </div><button onclick="closeSettingsDrawer()" class="w-10 h-10 rounded-full bg-white/20 backdrop-blur flex items-center justify-center text-white hover:bg-white/30 transition-colors text-xl">✕</button>
+       </div>
+      </div>
+      <div class="p-4 overflow-y-auto space-y-4" style="max-height: calc(90vh - 100px);"><!-- Settings Tabs -->
+       <div class="flex gap-2 bg-gray-100 rounded-xl p-1"><button onclick="switchSettingsTab('chores-edit')" id="settings-tab-chores" class="flex-1 py-2 px-3 rounded-lg font-semibold text-sm bg-white text-purple-600 shadow-sm transition-all"> 🧹 Chores </button> <button onclick="switchSettingsTab('meals-edit')" id="settings-tab-meals" class="flex-1 py-2 px-3 rounded-lg font-semibold text-sm text-gray-600 transition-all"> 🍽️ Meals </button> <button onclick="switchSettingsTab('shopping-edit')" id="settings-tab-shopping" class="flex-1 py-2 px-3 rounded-lg font-semibold text-sm text-gray-600 transition-all"> 🛒 Shopping </button>
+       </div><!-- Chores Editor -->
+       <div id="chores-editor" class="space-y-3"><button onclick="showAddChoreForm()" class="w-full py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all transform hover:scale-105 flex items-center justify-center gap-2"> <span>+</span> Add New Chore </button>
+        <div id="custom-chores-list" class="space-y-2"></div>
+       </div><!-- Meals Editor -->
+       <div id="meals-editor" class="hidden space-y-3">
+        <p class="text-sm text-gray-600 text-center">Meal customization coming soon!</p>
+       </div><!-- Shopping Editor -->
+       <div id="shopping-editor" class="hidden space-y-3"><button onclick="showAddItemForm()" class="w-full py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all transform hover:scale-105 flex items-center justify-center gap-2"> <span>+</span> Add New Item </button>
+        <div id="custom-items-list" class="space-y-2"></div>
+       </div>
+      </div>
+     </div>
+    </div><!-- Add Chore Form Modal -->
+    <div id="add-chore-modal" class="fixed inset-0 bg-black/50 hidden z-[60] flex items-center justify-center p-4">
+     <div class="bg-white rounded-3xl p-6 max-w-md w-full animate-in card-shadow">
+      <h3 class="font-bold text-xl text-gray-800 mb-4">Add New Chore</h3>
+      <form id="add-chore-form" onsubmit="handleAddChore(event)" class="space-y-3">
+       <div><label for="chore-task" class="block text-sm font-semibold text-gray-700 mb-1">Task Name</label> <input type="text" id="chore-task" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="e.g., Water the plants" required>
+       </div>
+       <div><label for="chore-icon" class="block text-sm font-semibold text-gray-700 mb-1">Icon (emoji)</label> <input type="text" id="chore-icon" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="🌱" maxlength="2" required>
+       </div>
+       <div><label for="chore-time" class="block text-sm font-semibold text-gray-700 mb-1">Time Estimate</label> <input type="text" id="chore-time" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="15 min">
+       </div>
+       <div><label for="chore-day" class="block text-sm font-semibold text-gray-700 mb-1">Day</label> <select id="chore-day" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" required> <option value="Monday">Monday</option> <option value="Tuesday">Tuesday</option> <option value="Wednesday">Wednesday</option> <option value="Thursday">Thursday</option> <option value="Friday">Friday</option> <option value="Saturday">Saturday</option> <option value="Sunday">Sunday</option> </select>
+       </div>
+       <div class="flex gap-3 pt-2"><button type="button" onclick="closeAddChoreModal()" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-sm"> Cancel </button> <button type="submit" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all text-sm"> Add Chore </button>
+       </div>
+      </form>
+     </div>
+    </div><!-- Add Shopping Item Form Modal -->
+    <div id="add-item-modal" class="fixed inset-0 bg-black/50 hidden z-[60] flex items-center justify-center p-4">
+     <div class="bg-white rounded-3xl p-6 max-w-md w-full animate-in card-shadow">
+      <h3 class="font-bold text-xl text-gray-800 mb-4">Add Shopping Item</h3>
+      <form id="add-item-form" onsubmit="handleAddItem(event)" class="space-y-3">
+       <div><label for="item-name" class="block text-sm font-semibold text-gray-700 mb-1">Item Name</label> <input type="text" id="item-name" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="e.g., Olive oil" required>
+       </div>
+       <div><label for="item-amount" class="block text-sm font-semibold text-gray-700 mb-1">Amount</label> <input type="text" id="item-amount" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="500ml" required>
+       </div>
+       <div><label for="item-price" class="block text-sm font-semibold text-gray-700 mb-1">Price (KES)</label> <input type="number" id="item-price" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="350" required>
+       </div>
+       <div><label for="item-category" class="block text-sm font-semibold text-gray-700 mb-1">Category</label> <select id="item-category" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" required> <option value="staples">Staples</option> <option value="proteins">Proteins</option> <option value="vegetables">Vegetables</option> <option value="breakfast">Breakfast &amp; Snacks</option> <option value="basics">Cooking Basics</option> </select>
+       </div>
+       <div class="flex gap-3 pt-2"><button type="button" onclick="closeAddItemModal()" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-sm"> Cancel </button> <button type="submit" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all text-sm"> Add Item </button>
+       </div>
+      </form>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    // Country configuration
+    const countryData = {
+      'Kenya': {
+        flag: '🇰🇪',
+        currency: 'KES',
+        paymentMethods: [
+          { name: 'M-Pesa', icon: '📱', color: 'from-green-500 to-green-600', number: '*123*456#' },
+          { name: 'Airtel Money', icon: '💳', color: 'from-red-500 to-red-600', number: '*234*567#' }
+        ]
+      },
+      'Ivory Coast': {
+        flag: '🇨🇮',
+        currency: 'XOF',
+        paymentMethods: [
+          { name: 'Wave', icon: '🌊', color: 'from-blue-500 to-blue-600', number: '*123*1#' },
+          { name: 'Orange Money', icon: '🍊', color: 'from-orange-500 to-orange-600', number: '#144#' }
+        ]
+      },
+      'Cameroon': {
+        flag: '🇨🇲',
+        currency: 'XAF',
+        paymentMethods: [
+          { name: 'Orange Money', icon: '🍊', color: 'from-orange-500 to-orange-600', number: '#150#' },
+          { name: 'MTN Mobile Money', icon: '📱', color: 'from-yellow-500 to-yellow-600', number: '*126#' }
+        ]
+      },
+      'Egypt': {
+        flag: '🇪🇬',
+        currency: 'EGP',
+        paymentMethods: [
+          { name: 'Vodafone Cash', icon: '💳', color: 'from-red-500 to-red-600', number: '*9#' },
+          { name: 'Orange Cash', icon: '🍊', color: 'from-orange-500 to-orange-600', number: '#4444#' }
+        ]
+      }
+    };
+
+    let selectedCountry = null;
+    let isAuthenticated = false;
+    let currentSettingsTab = 'chores-edit';
+
+    // Daily chores (every day)
+    const dailyChores = [
+      { id: 'daily1', task: '7:30 AM – Prepare Breakfast', icon: '🍳', time: '30 min' },
+      { id: 'daily2', task: 'After breakfast – Clear table, wash dishes, wipe surfaces', icon: '🧽', time: '15 min' },
+      { id: 'daily3', task: 'Make the beds', icon: '🛏️', time: '10 min' },
+      { id: 'daily4', task: 'After cooking – Pick the kids', icon: '🚗', time: '30 min' },
+      { id: 'daily5', task: 'Before leaving – Clean counters, wash dishes, empty trash', icon: '🗑️', time: '15 min' }
+    ];
+
+    // Default chores data
+    const defaultChoresData = {
+      Monday: [
+        { id: 'default-mon1', task: 'Sweep and floors', icon: '🧹', time: '20 min' },
+        { id: 'default-mon2', task: 'Cook meals', icon: '🍲', time: '1 hr' }
+      ],
+      Tuesday: [
+        { id: 'default-tue1', task: 'Change bedsheets', icon: '🛏️', time: '20 min' },
+        { id: 'default-tue2', task: 'Sweep floors', icon: '🧹', time: '15 min' },
+        { id: 'default-tue3', task: 'Cook meals', icon: '🍲', time: '1 hr' },
+        { id: 'default-tue4', task: 'Laundry', icon: '👕', time: '45 min' },
+        { id: 'default-tue5', task: 'Wash bathrooms', icon: '🚿', time: '30 min' }
+      ],
+      Wednesday: [
+        { id: 'default-wed1', task: 'Sweep and mop floors', icon: '🧹', time: '30 min' },
+        { id: 'default-wed2', task: 'Cook meals', icon: '🍲', time: '1 hr' },
+        { id: 'default-wed3', task: 'Iron clothes', icon: '👔', time: '30 min' }
+      ],
+      Thursday: [
+        { id: 'default-thu1', task: 'Clean windows and dust drawers', icon: '🪟', time: '40 min' },
+        { id: 'default-thu2', task: 'Sweep and mop floors', icon: '🧹', time: '30 min' },
+        { id: 'default-thu3', task: 'Cook meals', icon: '🍲', time: '1 hr' },
+        { id: 'default-thu4', task: 'Laundry', icon: '👕', time: '45 min' }
+      ],
+      Friday: [
+        { id: 'default-fri1', task: 'Sweep and mop floors', icon: '🧹', time: '30 min' },
+        { id: 'default-fri2', task: 'Cook meals', icon: '🍲', time: '1 hr' },
+        { id: 'default-fri3', task: 'Iron clothes', icon: '👔', time: '30 min' }
+      ],
+      Saturday: [
+        { id: 'default-sat1', task: 'Gardening', icon: '🌱', time: '1 hr' },
+        { id: 'default-sat2', task: 'Go to the market / grocery shopping', icon: '🛒', time: '1.5 hrs' },
+        { id: 'default-sat3', task: 'Cook meals', icon: '🍲', time: '1 hr' },
+        { id: 'default-sat4', task: 'Laundry and ironing', icon: '👕', time: '1.5 hrs' },
+        { id: 'default-sat5', task: 'Wash bathrooms', icon: '🚿', time: '30 min' }
+      ],
+      Sunday: [
+        { id: 'default-sun1', task: 'Plan weekly meals', icon: '📝', time: '20 min' },
+        { id: 'default-sun2', task: 'Prep lunches', icon: '🍱', time: '30 min' },
+        { id: 'default-sun3', task: 'Relax & recharge', icon: '☕', time: '∞' }
+      ]
+    };
+
+    const mealsData = {
+      Monday: {
+        breakfast: { name: 'Pap (corn porridge) + Groundnuts', icon: '🥣', time: '15 min', snack: 'Orange' },
+        lunch: { name: 'Beans + Sweet Potatoes + Salad', icon: '🫘', time: '45 min', snack: '' },
+        dinner: {
+          name: 'Grilled Fish + Sautéed Vegetables', icon: '🐟', time: '30 min',
+          recipe: {
+            servings: 4,
+            ingredients: [
+              { name: 'Fresh fish', amount: '500g', price: 400 },
+              { name: 'Tomatoes', amount: '300g', price: 45 },
+              { name: 'Onions', amount: '200g', price: 30 },
+              { name: 'Bell pepper', amount: '100g', price: 25 },
+              { name: 'Cooking oil', amount: '2 tbsp', price: 20 }
+            ],
+            steps: [
+              'Clean and season the fish with salt and pepper',
+              'Grill fish on both sides until cooked through',
+              'Dice tomatoes, onions, and peppers',
+              'Heat oil in a pan and sauté vegetables',
+              'Season vegetables with salt and spices',
+              'Serve grilled fish with sautéed vegetables'
+            ]
+          }
+        }
+      },
+      Tuesday: {
+        breakfast: { name: '2 Boiled Eggs + Whole Wheat Bread', icon: '🥚', time: '10 min', snack: 'Banana' },
+        lunch: { name: 'Ndolé (light oil) + Small Plantain', icon: '🥬', time: '45 min', snack: '' },
+        dinner: {
+          name: 'Vegetable Omelette', icon: '🍳', time: '20 min',
+          recipe: {
+            servings: 4,
+            ingredients: [
+              { name: 'Eggs', amount: '6 eggs', price: 90 },
+              { name: 'Cabbage', amount: '200g', price: 35 },
+              { name: 'Onions', amount: '100g', price: 15 },
+              { name: 'Tomatoes', amount: '100g', price: 15 },
+              { name: 'Cooking oil', amount: '1 tbsp', price: 10 }
+            ],
+            steps: [
+              'Chop cabbage and onions finely',
+              'Beat eggs in a bowl with salt',
+              'Mix chopped vegetables into eggs',
+              'Heat oil in a pan',
+              'Pour egg mixture and cook until set',
+              'Flip and cook other side until golden'
+            ]
+          }
+        }
+      },
+      Wednesday: {
+        breakfast: { name: 'Oatmeal (water-based) + Banana', icon: '🥣', time: '10 min', snack: 'Orange' },
+        lunch: { name: 'Okra Soup + Small Garri', icon: '🥘', time: '40 min', snack: '' },
+        dinner: {
+          name: 'Beans Soup (minimal palm oil)', icon: '🫘', time: '50 min',
+          recipe: {
+            servings: 4,
+            ingredients: [
+              { name: 'Dry beans', amount: '500g', price: 100 },
+              { name: 'Palm oil', amount: '1 tbsp', price: 15 },
+              { name: 'Onions', amount: '100g', price: 15 },
+              { name: 'Tomatoes', amount: '200g', price: 30 },
+              { name: 'Pepper', amount: '50g', price: 10 }
+            ],
+            steps: [
+              'Soak beans overnight, then boil until soft',
+              'Heat palm oil in a pot',
+              'Add chopped onions and fry lightly',
+              'Add tomatoes and pepper, cook until soft',
+              'Add cooked beans and water to make soup',
+              'Season with salt and simmer for 20 minutes'
+            ]
+          }
+        }
+      },
+      Thursday: {
+        breakfast: { name: 'Pap + 1 Boiled Egg', icon: '🥣', time: '15 min', snack: 'Small handful groundnuts' },
+        lunch: { name: 'Rice + Vegetable Stew + Dry Fish', icon: '🍚', time: '45 min', snack: '' },
+        dinner: {
+          name: 'Grilled Fish + Steamed Cabbage & Carrots', icon: '🐟', time: '35 min',
+          recipe: {
+            servings: 4,
+            ingredients: [
+              { name: 'Fresh fish', amount: '500g', price: 400 },
+              { name: 'Cabbage', amount: '300g', price: 50 },
+              { name: 'Carrots', amount: '200g', price: 20 },
+              { name: 'Onions', amount: '100g', price: 15 },
+              { name: 'Salt & pepper', amount: 'to taste', price: 5 }
+            ],
+            steps: [
+              'Clean and season fish with salt and pepper',
+              'Grill fish until cooked through on both sides',
+              'Shred cabbage and slice carrots thinly',
+              'Steam vegetables with a little water until tender',
+              'Season steamed vegetables with salt',
+              'Serve grilled fish with steamed vegetables'
+            ]
+          }
+        }
+      },
+      Friday: {
+        breakfast: { name: 'Oatmeal + Orange', icon: '🥣', time: '10 min', snack: 'Banana' },
+        lunch: { name: 'Beans + Boiled Sweet Potatoes', icon: '🫘', time: '50 min', snack: '' },
+        dinner: {
+          name: 'Okra Soup + Small Garri', icon: '🥘', time: '40 min',
+          recipe: {
+            servings: 4,
+            ingredients: [
+              { name: 'Fresh okra', amount: '500g', price: 80 },
+              { name: 'Garri', amount: '200g', price: 50 },
+              { name: 'Palm oil', amount: '1 tbsp', price: 15 },
+              { name: 'Onions', amount: '100g', price: 15 },
+              { name: 'Pepper', amount: '50g', price: 10 },
+              { name: 'Dried fish', amount: '100g', price: 100 }
+            ],
+            steps: [
+              'Wash and slice okra into thin rounds',
+              'Heat palm oil and fry onions',
+              'Add pepper and dried fish',
+              'Add okra and water, cook until slimy',
+              'Season with salt and simmer',
+              'Prepare garri separately and serve with soup'
+            ]
+          }
+        }
+      },
+      Saturday: {
+        breakfast: { name: '2 Boiled Eggs + Banana', icon: '🥚', time: '10 min', snack: 'Orange' },
+        lunch: { name: 'Ndolé + Small Portion Rice', icon: '🥬', time: '50 min', snack: '' },
+        dinner: {
+          name: 'Vegetable Stir-fry + Dry Fish', icon: '🥗', time: '25 min',
+          recipe: {
+            servings: 4,
+            ingredients: [
+              { name: 'Cabbage', amount: '300g', price: 50 },
+              { name: 'Carrots', amount: '200g', price: 20 },
+              { name: 'Onions', amount: '150g', price: 23 },
+              { name: 'Dried fish', amount: '150g', price: 150 },
+              { name: 'Cooking oil', amount: '2 tbsp', price: 20 }
+            ],
+            steps: [
+              'Shred cabbage and slice carrots thinly',
+              'Chop onions and soak dried fish',
+              'Heat oil in a large pan or wok',
+              'Add onions and fry until translucent',
+              'Add carrots and cabbage, stir-fry quickly',
+              'Add dried fish, season, and serve hot'
+            ]
+          }
+        }
+      },
+      Sunday: {
+        breakfast: { name: 'Uji with Groundnuts', icon: '🥣', time: '15 min', snack: 'Banana' },
+        lunch: { name: 'Rice + Ndengu (Leftover)', icon: '🍚', time: '20 min', snack: 'Sweet potato' },
+        dinner: {
+          name: 'Chicken Soup Special', icon: '🍲', time: '1.5 hrs',
+          recipe: {
+            servings: 6,
+            ingredients: [
+              { name: 'Chicken (kienyeji)', amount: '1kg', price: 600 },
+              { name: 'Potatoes', amount: '1kg', price: 100 },
+              { name: 'Carrots', amount: '500g', price: 50 },
+              { name: 'Onions', amount: '200g', price: 30 },
+              { name: 'Tomatoes', amount: '300g', price: 45 },
+              { name: 'Sukuma wiki', amount: '1 bunch', price: 50 }
+            ],
+            steps: [
+              'Cut chicken and boil until very tender',
+              'Add potatoes and carrots to soup',
+              'Fry onions and tomatoes, add to pot',
+              'Simmer until everything is cooked',
+              'Prepare sukuma wiki on the side',
+              'Serve hot with ugali or rice'
+            ]
+          }
+        }
+      }
+    };
+
+    // State
+    let currentTab = 'chores';
+    let currentChoreDay = 'Monday';
+    let currentMealDay = 'Monday';
+    let currentMealView = 'daily';
+    let userData = [];
+    let customChores = [];
+    let customItems = [];
+    let choreCompletions = {};
+    let cartItems = {};
+
+    // Monthly meal plan data
+    const monthlyMealPlan = {
+      week1: {
+        Monday: { breakfast: 'Smoothie mango banana', lunch: 'Braised fish & fish fillet with roasted potatoes', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🐟', supperIcon: '' },
+        Tuesday: { breakfast: 'Tea ginger lemon', lunch: 'Ugali, greens & meat', supper: '', snacks: 'Apples/pear', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+        Wednesday: { breakfast: 'Smoothie pineapple celery', lunch: 'Chinese cabbage, pak choi & pork', supper: 'Same as lunch', snacks: 'Avocado & carrot salad', breakfastIcon: '🥤', lunchIcon: '🥬', supperIcon: '🥬' },
+        Thursday: { breakfast: 'Smoothie ananas ginger', lunch: 'Githeri', supper: 'Same as lunch', snacks: 'Cashew nuts and tangerine', breakfastIcon: '🥤', lunchIcon: '🍲', supperIcon: '🍲' },
+        Friday: { breakfast: 'Mango chia pudding', lunch: 'Chicken with sautéed vegetables', supper: '', snacks: 'Apple cake', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
+        Saturday: { breakfast: 'Spanish omelette', lunch: 'Rice + stew with peas and minced meat + sautéed carrot and cabbage', supper: 'Avocado', snacks: 'Samosa', breakfastIcon: '🍳', lunchIcon: '🍚', supperIcon: '🥑' },
+        Sunday: { breakfast: 'Pancakes, avocado toast, boiled egg & tea', lunch: 'Grilled fish and plantains', supper: '', snacks: '', breakfastIcon: '🥞', lunchIcon: '🐟', supperIcon: '' }
+      },
+      week2: {
+        Monday: { breakfast: '', lunch: 'Braised fish & fish fillet with roasted potatoes', supper: '', snacks: '', breakfastIcon: '', lunchIcon: '🐟', supperIcon: '' },
+        Tuesday: { breakfast: 'Tea', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+        Wednesday: { breakfast: 'Smoothie', lunch: 'Chinese cabbage, pak choi & pork', supper: '', snacks: 'Avocado & carrot salad', breakfastIcon: '🥤', lunchIcon: '🥬', supperIcon: '' },
+        Thursday: { breakfast: 'Smoothie', lunch: 'Githeri', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍲', supperIcon: '' },
+        Friday: { breakfast: 'Mango chia pudding', lunch: 'Chicken with sautéed vegetables', supper: '', snacks: 'Apple cake', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
+        Saturday: { breakfast: 'Spanish omelette', lunch: 'Avocado salad', supper: '', snacks: 'Samosa', breakfastIcon: '🍳', lunchIcon: '🥑', supperIcon: '' },
+        Sunday: { breakfast: 'Pancakes & tea', lunch: 'Puff-puff & beans', supper: '', snacks: '', breakfastIcon: '🥞', lunchIcon: '🍩', supperIcon: '' }
+      },
+      week3: {
+        Monday: { breakfast: 'Green smoothie', lunch: 'Broccoli pasta & fried chicken', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍝', supperIcon: '' },
+        Tuesday: { breakfast: '', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '', lunchIcon: '🍲', supperIcon: '' },
+        Wednesday: { breakfast: 'Brewed tea', lunch: 'Chapati, lentils & steamed cabbage', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🫓', supperIcon: '' },
+        Thursday: { breakfast: 'Smoothie', lunch: 'Pilau, banana & kachumbari', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍚', supperIcon: '' },
+        Friday: { breakfast: 'Vegetable smoothie & oat-banana pancake', lunch: 'Chicken stew & rice', supper: '', snacks: 'Mandazi', breakfastIcon: '🥤', lunchIcon: '🍗', supperIcon: '' },
+        Saturday: { breakfast: 'Spanish omelette', lunch: 'Biriyani rice', supper: '', snacks: 'Mandazi', breakfastIcon: '🍳', lunchIcon: '🍚', supperIcon: '' },
+        Sunday: { breakfast: 'Banana bread & tea', lunch: 'Samosa & salad', supper: '', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥟', supperIcon: '' }
+      },
+      week4: {
+        Monday: { breakfast: 'Green smoothie', lunch: 'Samosa & salad', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🥟', supperIcon: '' },
+        Tuesday: { breakfast: 'Tea', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+        Wednesday: { breakfast: 'Smoothie', lunch: 'Sweet potatoes & butternut squash', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍠', supperIcon: '' },
+        Thursday: { breakfast: 'Smoothie', lunch: 'Pilau, banana & kachumbari', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍚', supperIcon: '' },
+        Friday: { breakfast: 'Avocado toast & egg', lunch: 'Plantain & chicken', supper: '', snacks: 'Carrot cake', breakfastIcon: '🥑', lunchIcon: '🍌', supperIcon: '' },
+        Saturday: { breakfast: 'Spanish omelette', lunch: 'Liver salad', supper: '', snacks: 'Mandazi', breakfastIcon: '🍳', lunchIcon: '🥗', supperIcon: '' },
+        Sunday: { breakfast: 'Banana bread & tea', lunch: 'Samosa & salad', supper: 'Salad', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥟', supperIcon: '🥗' }
+      }
+    };
+
+    // Default shopping data
+    const defaultShoppingData = {
+      staples: [
+        { id: 'default-maize-flour', name: 'Maize flour', amount: '2kg', price: 300 },
+        { id: 'default-rice', name: 'Rice', amount: '2kg', price: 400 },
+        { id: 'default-dry-beans', name: 'Dry beans', amount: '2kg', price: 400 },
+        { id: 'default-ndengu', name: 'Ndengu (green grams)', amount: '1kg', price: 300 },
+        { id: 'default-potatoes', name: 'Potatoes', amount: '3kg', price: 300 },
+        { id: 'default-sweet-potatoes', name: 'Sweet potatoes', amount: '3kg', price: 300 }
+      ],
+      proteins: [
+        { id: 'default-eggs', name: 'Eggs', amount: '30 eggs', price: 450 },
+        { id: 'default-omena', name: 'Omena', amount: '500g', price: 300 },
+        { id: 'default-chicken', name: 'Chicken (kienyeji, cut) OR beef bones', amount: '1kg', price: 600 }
+      ],
+      vegetables: [
+        { id: 'default-sukuma', name: 'Sukuma wiki', amount: '3 bunches', price: 150 },
+        { id: 'default-cabbage', name: 'Cabbage', amount: '1 large', price: 150 },
+        { id: 'default-tomatoes', name: 'Tomatoes', amount: '1kg', price: 150 },
+        { id: 'default-onions', name: 'Onions', amount: '1kg', price: 150 },
+        { id: 'default-carrots', name: 'Carrots', amount: '1kg', price: 100 }
+      ],
+      breakfast: [
+        { id: 'default-millet', name: 'Millet/sorghum flour (uji)', amount: '1kg', price: 200 },
+        { id: 'default-bananas', name: 'Bananas', amount: '1 dozen', price: 150 },
+        { id: 'default-groundnuts', name: 'Groundnuts OR peanut butter', amount: '1 pack', price: 200 }
+      ],
+      basics: [
+        { id: 'default-oil', name: 'Cooking oil', amount: 'small', price: 250 },
+        { id: 'default-spices', name: 'Salt & spices', amount: '1 pack', price: 100 }
+      ]
+    };
+
+    // Load data from localStorage
+    function loadData() {
+      try {
+        const saved = localStorage.getItem('homeManagerData');
+        if (saved) {
+          const data = JSON.parse(saved);
+          customChores = data.customChores || [];
+          customItems = data.customItems || [];
+          choreCompletions = data.choreCompletions || {};
+          cartItems = data.cartItems || {};
+          selectedCountry = data.selectedCountry || null;
+        }
+      } catch (e) {
+        console.error('Failed to load data', e);
+      }
+    }
+
+    // Save data to localStorage
+    function saveData() {
+      try {
+        localStorage.setItem('homeManagerData', JSON.stringify({
+          customChores,
+          customItems,
+          choreCompletions,
+          cartItems,
+          selectedCountry
+        }));
+      } catch (e) {
+        console.error('Failed to save data', e);
+      }
+    }
+
+    // Toast notification
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg text-sm z-50 animate-in';
+      toast.textContent = message;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Country selection
+    function selectCountry(country) {
+      selectedCountry = country;
+      saveData();
+      document.getElementById('country-selection').classList.add('hidden');
+      document.getElementById('main-content').classList.remove('hidden');
+      document.getElementById('country-flag').textContent = countryData[country].flag;
+      renderCurrentView();
+    }
+
+    function showCountrySelection() {
+      document.getElementById('country-selection').classList.remove('hidden');
+      document.getElementById('main-content').classList.add('hidden');
+    }
+
+    // Switch tabs
+    function switchTab(tab) {
+      currentTab = tab;
+      ['chores', 'meals', 'shopping'].forEach(t => {
+        const contentEl = document.getElementById(`content-${t}`);
+        if (contentEl) {
+          contentEl.classList.toggle('hidden', t !== tab);
+        }
+        const tabBtn = document.getElementById(`tab-${t}`);
+        if (tabBtn) {
+          if (t === tab) {
+            tabBtn.classList.add('tab-active');
+            tabBtn.classList.remove('bg-white', 'text-gray-600', 'card-shadow');
+          } else {
+            tabBtn.classList.remove('tab-active');
+            tabBtn.classList.add('bg-white', 'text-gray-600', 'card-shadow');
+          }
+        }
+      });
+      renderCurrentView();
+    }
+
+    // Select chore day
+    function selectChoreDay(day) {
+      currentChoreDay = day;
+      document.querySelectorAll('.day-chip').forEach((chip, i) => {
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        if (i < 7) {
+          if (days[i] === day) {
+            chip.classList.add('day-chip-active');
+            chip.classList.remove('bg-white', 'text-gray-600');
+          } else {
+            chip.classList.remove('day-chip-active');
+            chip.classList.add('bg-white', 'text-gray-600');
+          }
+        }
+      });
+      renderChores();
+    }
+
+    // Select meal day
+    function selectMealDay(day) {
+      currentMealDay = day;
+      document.querySelectorAll('.meal-day-chip').forEach((chip, i) => {
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        if (days[i] === day) {
+          chip.classList.add('day-chip-active');
+          chip.classList.remove('bg-white', 'text-gray-600');
+        } else {
+          chip.classList.remove('day-chip-active');
+          chip.classList.add('bg-white', 'text-gray-600');
+        }
+      });
+      renderMeals();
+    }
+
+    // Set meal view
+    function setMealView(view) {
+      currentMealView = view;
+      const dailyBtn = document.getElementById('view-daily');
+      const monthlyBtn = document.getElementById('view-monthly');
+      const dailyViewDiv = document.getElementById('daily-view');
+      const monthlyViewDiv = document.getElementById('monthly-view');
+
+      if (view === 'daily') {
+        dailyBtn.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-indigo-500', 'text-white');
+        dailyBtn.classList.remove('bg-white', 'text-gray-600', 'card-shadow');
+        monthlyBtn.classList.remove('bg-gradient-to-r', 'from-purple-500', 'to-indigo-500', 'text-white');
+        monthlyBtn.classList.add('bg-white', 'text-gray-600', 'card-shadow');
+        dailyViewDiv.classList.remove('hidden');
+        monthlyViewDiv.classList.add('hidden');
+      } else {
+        monthlyBtn.classList.add('bg-gradient-to-r', 'from-purple-500', 'to-indigo-500', 'text-white');
+        monthlyBtn.classList.remove('bg-white', 'text-gray-600', 'card-shadow');
+        dailyBtn.classList.remove('bg-gradient-to-r', 'from-purple-500', 'to-indigo-500', 'text-white');
+        dailyBtn.classList.add('bg-white', 'text-gray-600', 'card-shadow');
+        dailyViewDiv.classList.add('hidden');
+        monthlyViewDiv.classList.remove('hidden');
+        renderMonthlyCalendar();
+      }
+    }
+
+    // Render current view
+    function renderCurrentView() {
+      if (currentTab === 'chores') renderChores();
+      else if (currentTab === 'meals') renderMeals();
+      else if (currentTab === 'shopping') renderShopping();
+    }
+
+    // Check if chore is completed
+    function isChoreCompleted(choreId, day) {
+      return choreCompletions[`${choreId}-${day}`] || false;
+    }
+
+    // Toggle chore completion
+    function toggleChore(choreId, day) {
+      const key = `${choreId}-${day}`;
+      choreCompletions[key] = !choreCompletions[key];
+      saveData();
+      renderChores();
+    }
+
+    // Check if item is in cart
+    function isIngredientInCart(itemId) {
+      return cartItems[itemId] || false;
+    }
+
+    // Toggle cart item
+    function toggleIngredient(itemId) {
+      cartItems[itemId] = !cartItems[itemId];
+      saveData();
+      renderShopping();
+    }
+
+    // Get chores for day
+    function getChoresForDay(day) {
+      const defaultChores = defaultChoresData[day] || [];
+      const custom = customChores.filter(c => c.day === day);
+      return [...defaultChores, ...custom];
+    }
+
+    // Get items by category
+    function getItemsByCategory(category) {
+      const defaultItems = defaultShoppingData[category] || [];
+      const custom = customItems.filter(i => i.category === category);
+      return [...defaultItems, ...custom];
+    }
+
+    // Render chores
+    function renderChores() {
+      const container = document.getElementById('chores-list');
+      const allChores = getChoresForDay(currentChoreDay);
+
+      let html = `
+        <div class="bg-gradient-to-r from-blue-100 to-purple-100 rounded-2xl p-4 mb-3">
+          <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span>📅</span> Daily (Every Day)
+          </h3>
+          <div class="space-y-2">
+            ${dailyChores.map(chore => {
+              const done = isChoreCompleted(chore.id, currentChoreDay);
+              return `
+                <div class="bg-white rounded-xl p-3 flex items-center gap-3 ${done ? 'chore-done' : ''} cursor-pointer" onclick="toggleChore('${chore.id}', '${currentChoreDay}')">
+                  <div class="w-8 h-8 rounded-full ${done ? 'bg-green-100' : 'bg-blue-100'} flex items-center justify-center text-lg">
+                    ${done ? '✓' : chore.icon}
+                  </div>
+                  <div class="flex-1">
+                    <p class="font-medium text-gray-800 text-sm">${chore.task}</p>
+                    ${chore.time ? `<p class="text-xs text-gray-500">${chore.time}</p>` : ''}
+                  </div>
+                  <div class="w-5 h-5 rounded-full border-2 ${done ? 'bg-green-500 border-green-500' : 'border-gray-300'} flex items-center justify-center">
+                    ${done ? '<span class="text-white text-xs">✓</span>' : ''}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+
+      if (allChores.length > 0) {
+        html += `
+          <div class="bg-white rounded-2xl p-4 card-shadow mb-2">
+            <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <span>✨</span> ${currentChoreDay} Tasks
+            </h3>
+            <div class="space-y-2">
+              ${allChores.map(chore => {
+                const done = isChoreCompleted(chore.id, currentChoreDay);
+                const isCustom = !chore.id.startsWith('default-');
+                return `
+                  <div class="bg-white rounded-xl p-3 border ${isCustom ? 'border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50' : 'border-gray-100'} flex items-center gap-3 ${done ? 'chore-done' : ''} cursor-pointer" onclick="toggleChore('${chore.id}', '${currentChoreDay}')">
+                    <div class="w-10 h-10 rounded-full ${done ? 'bg-green-100' : 'bg-purple-100'} flex items-center justify-center text-xl">
+                      ${done ? '✓' : chore.icon}
+                    </div>
+                    <div class="flex-1">
+                      <p class="font-semibold text-gray-800">${chore.task}</p>
+                      ${chore.time ? `<p class="text-xs text-gray-500">${chore.time}</p>` : ''}
+                      ${isCustom ? '<p class="text-xs text-purple-600 font-semibold">Custom</p>' : ''}
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 ${done ? 'bg-green-500 border-green-500' : 'border-gray-300'} flex items-center justify-center">
+                      ${done ? '<span class="text-white text-xs">✓</span>' : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = html;
+    }
+
+    // Render meals
+    function renderMeals() {
+      const container = document.getElementById('meals-list');
+      const dayMeals = mealsData[currentMealDay];
+
+      const mealTypes = [
+        { key: 'breakfast', label: 'Breakfast', color: 'from-amber-400 to-orange-400', snackLabel: 'Mid-Morning' },
+        { key: 'lunch', label: 'Lunch', color: 'from-green-400 to-emerald-400', snackLabel: 'Afternoon' },
+        { key: 'dinner', label: 'Dinner', color: 'from-purple-400 to-pink-400', snackLabel: null }
+      ];
+
+      container.innerHTML = mealTypes.map(({ key, label, color, snackLabel }) => {
+        const meal = dayMeals[key];
+        const hasRecipe = meal.recipe;
+        const snack = meal.snack;
+
+        let html = `
+          <div class="bg-white rounded-xl overflow-hidden card-shadow cursor-pointer" onclick="openRecipeModal('${currentMealDay}', '${key}')">
+            <div class="bg-gradient-to-r ${color} px-4 py-2">
+              <span class="text-white text-xs font-semibold">${label}</span>
+            </div>
+            <div class="p-4 flex items-center gap-3">
+              <span class="text-3xl">${meal.icon}</span>
+              <div class="flex-1">
+                <p class="font-bold text-gray-800">${meal.name}</p>
+                <div class="flex gap-3 text-xs text-gray-500 mt-1">
+                  <span>⏱ ${meal.time}</span>
+                  ${!hasRecipe ? '<span class="text-purple-600 font-semibold">+ Add Recipe</span>' : '<span class="text-green-600">✓ Recipe ready</span>'}
+                </div>
+              </div>
+              <span class="text-gray-400">›</span>
+            </div>
+          </div>
+        `;
+
+        if (snack && snackLabel) {
+          html += `
+            <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-3 flex items-center gap-2">
+              <span class="text-sm">☕</span>
+              <div class="flex-1">
+                <p class="text-xs font-semibold text-gray-600">${snackLabel} Snack</p>
+                <p class="text-sm text-gray-800">${snack}</p>
+              </div>
+            </div>
+          `;
+        }
+
+        return html;
+      }).join('');
+    }
+
+    // Render monthly calendar
+    function renderMonthlyCalendar() {
+      const container = document.getElementById('monthly-calendar');
+      const weeks = ['week1', 'week2', 'week3', 'week4'];
+      const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+      let html = weeks.map((weekKey, weekIndex) => {
+        const weekData = monthlyMealPlan[weekKey];
+
+        return `
+          <div class="bg-white rounded-2xl p-4 card-shadow mb-4">
+            <h3 class="font-bold text-lg text-gray-800 mb-3 flex items-center gap-2">
+              <span>📆</span> Week ${weekIndex + 1}
+            </h3>
+            <div class="grid grid-cols-1 gap-3">
+              ${days.map(day => {
+                const dayData = weekData[day];
+                const hasContent = dayData.breakfast || dayData.lunch || dayData.supper || dayData.snacks;
+
+                return `
+                  <div class="border border-gray-200 rounded-xl p-3 ${!hasContent ? 'bg-gray-50' : 'bg-gradient-to-r from-purple-50 to-blue-50'}">
+                    <div class="font-bold text-sm text-gray-800 mb-2 pb-2 border-b border-gray-200">${day}</div>
+                    ${!hasContent ? '<p class="text-xs text-gray-400 italic">Rest day</p>' : `
+                      <div class="space-y-2">
+                        ${dayData.breakfast ? `
+                          <div class="flex items-start gap-2">
+                            <span class="text-lg flex-shrink-0">${dayData.breakfastIcon}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-xs font-semibold text-amber-600">Breakfast</p>
+                              <p class="text-xs text-gray-700">${dayData.breakfast}</p>
+                            </div>
+                          </div>
+                        ` : ''}
+                        ${dayData.lunch ? `
+                          <div class="flex items-start gap-2">
+                            <span class="text-lg flex-shrink-0">${dayData.lunchIcon}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-xs font-semibold text-green-600">Lunch</p>
+                              <p class="text-xs text-gray-700">${dayData.lunch}</p>
+                            </div>
+                          </div>
+                        ` : ''}
+                        ${dayData.supper && dayData.supper !== 'Same as lunch' ? `
+                          <div class="flex items-start gap-2">
+                            <span class="text-lg flex-shrink-0">${dayData.supperIcon}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-xs font-semibold text-purple-600">Supper</p>
+                              <p class="text-xs text-gray-700">${dayData.supper}</p>
+                            </div>
+                          </div>
+                        ` : dayData.supper === 'Same as lunch' ? `
+                          <div class="flex items-start gap-2">
+                            <span class="text-lg flex-shrink-0">${dayData.supperIcon}</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-xs font-semibold text-purple-600">Supper</p>
+                              <p class="text-xs text-gray-500 italic">Same as lunch</p>
+                            </div>
+                          </div>
+                        ` : ''}
+                        ${dayData.snacks ? `
+                          <div class="flex items-start gap-2 bg-blue-50 rounded-lg p-2 mt-2">
+                            <span class="text-sm flex-shrink-0">🍎</span>
+                            <div class="flex-1 min-w-0">
+                              <p class="text-xs font-semibold text-blue-600">Snacks</p>
+                              <p class="text-xs text-gray-700">${dayData.snacks}</p>
+                            </div>
+                          </div>
+                        ` : ''}
+                      </div>
+                    `}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = html;
+    }
+
+    // Render shopping
+    function renderShopping() {
+      let grandTotal = 0;
+      let inCartCount = 0;
+      let totalItems = 0;
+
+      const categories = [
+        { key: 'staples', elementId: 'staples-list', priceId: 'staples-price' },
+        { key: 'proteins', elementId: 'proteins-list', priceId: 'proteins-price' },
+        { key: 'vegetables', elementId: 'vegetables-list', priceId: 'vegetables-price' },
+        { key: 'breakfast', elementId: 'breakfast-list', priceId: 'breakfast-price' },
+        { key: 'basics', elementId: 'basics-list', priceId: 'basics-price' }
+      ];
+
+      categories.forEach(({ key, elementId, priceId }) => {
+        const container = document.getElementById(elementId);
+        const allItems = getItemsByCategory(key);
+        totalItems += allItems.length;
+        let categoryTotal = 0;
+
+        container.innerHTML = allItems.map(item => {
+          const bought = isIngredientInCart(item.id);
+          if (bought) inCartCount++;
+          categoryTotal += item.price;
+          grandTotal += item.price;
+          const isCustom = !item.id.startsWith('default-');
+
+          return `
+            <div class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0 ${bought ? 'ingredient-bought' : ''} cursor-pointer" onclick="toggleIngredient('${item.id}')">
+              <div class="w-5 h-5 rounded-full border-2 ${bought ? 'bg-green-500 border-green-500' : 'border-gray-300'} flex items-center justify-center flex-shrink-0">
+                ${bought ? '<span class="text-white text-xs">✓</span>' : ''}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 text-sm">${item.name}</p>
+                <p class="text-xs text-gray-500">${item.amount}${isCustom ? ' • Custom' : ''}</p>
+              </div>
+              <span class="font-semibold text-purple-600 flex-shrink-0 text-sm">KES ${item.price}</span>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById(priceId).textContent = `KES ${categoryTotal}`;
+      });
+
+      document.getElementById('total-price').textContent = `KES ${grandTotal}`;
+      document.getElementById('cart-count').textContent = `${inCartCount} / ${totalItems}`;
+      document.getElementById('cart-progress').style.width = `${totalItems > 0 ? (inCartCount / totalItems) * 100 : 0}%`;
+    }
+
+    // Open recipe modal
+    function openRecipeModal(day, mealType) {
+      const meal = mealsData[day][mealType];
+      const modal = document.getElementById('recipe-modal');
+      const title = document.getElementById('modal-title');
+      const content = document.getElementById('modal-content');
+
+      title.textContent = meal.name;
+
+      if (!meal.recipe) {
+        content.innerHTML = `
+          <div class="text-center py-8">
+            <span class="text-6xl mb-4 block">${meal.icon}</span>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">${meal.name}</h3>
+            <p class="text-gray-600 mb-6">No recipe available yet</p>
+          </div>
+        `;
+      } else {
+        const totalPrice = meal.recipe.ingredients.reduce((sum, ing) => sum + ing.price, 0);
+
+        content.innerHTML = `
+          <div class="flex items-center gap-4 mb-4">
+            <span class="text-5xl">${meal.icon}</span>
+            <div>
+              <p class="text-sm text-gray-500">Servings: ${meal.recipe.servings}</p>
+              <p class="text-sm text-gray-500">Time: ${meal.time}</p>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-bold text-gray-800">Ingredients</h4>
+              <span class="text-sm font-semibold text-purple-600">~KES ${totalPrice}</span>
+            </div>
+            <div class="bg-purple-50 rounded-xl p-3 space-y-2">
+              ${meal.recipe.ingredients.map(ing => `
+                <div class="flex justify-between text-sm">
+                  <span class="text-gray-700">${ing.name}</span>
+                  <span class="text-gray-500">${ing.amount} · KES ${ing.price}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div>
+            <h4 class="font-bold text-gray-800 mb-2">Instructions</h4>
+            <ol class="space-y-2">
+              ${meal.recipe.steps.map((step, i) => `
+                <li class="flex gap-3 text-sm">
+                  <span class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">${i + 1}</span>
+                  <span class="text-gray-700 pt-0.5">${step}</span>
+                </li>
+              `).join('')}
+            </ol>
+          </div>
+        `;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeRecipeModal() {
+      document.getElementById('recipe-modal').classList.add('hidden');
+    }
+
+    // Tips drawer
+    function openTipsDrawer() {
+      if (!selectedCountry) {
+        showToast('Please select a country first');
+        return;
+      }
+
+      const drawer = document.getElementById('tips-drawer');
+      const container = document.getElementById('tips-drawer-content');
+      const paymentMethods = countryData[selectedCountry].paymentMethods;
+
+      container.innerHTML = paymentMethods.map(method => `
+        <div class="bg-gradient-to-br from-white to-gray-50 rounded-2xl p-5 card-shadow border border-gray-100">
+          <div class="flex items-center gap-4 mb-4">
+            <div class="w-16 h-16 rounded-2xl bg-gradient-to-r ${method.color} flex items-center justify-center text-4xl shadow-lg">
+              ${method.icon}
+            </div>
+            <div class="flex-1">
+              <h4 class="font-bold text-gray-800 text-lg">${method.name}</h4>
+              <p class="text-xs text-gray-500">Mobile Money Transfer</p>
+            </div>
+          </div>
+          <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
+            <p class="text-xs text-gray-600 mb-2 font-semibold">Dial this code:</p>
+            <div class="flex items-center justify-between gap-3">
+              <p class="font-mono font-bold text-xl text-gray-800">${method.number}</p>
+              <button onclick="copyToClipboard('${method.number}')" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-bold transition-all transform hover:scale-105 shadow-md">
+                Copy
+              </button>
+            </div>
+          </div>
+          <p class="text-xs text-gray-500 mt-3 text-center">Thank you for your support! 💜</p>
+        </div>
+      `).join('');
+
+      drawer.classList.remove('hidden');
+    }
+
+    function closeTipsDrawer() {
+      document.getElementById('tips-drawer').classList.add('hidden');
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Code copied to clipboard!');
+      }).catch(() => {
+        showToast('Failed to copy code');
+      });
+    }
+
+    // Settings functions
+    function openPersonalSettings() {
+      openSettingsDrawer();
+    }
+
+    function openSettingsDrawer() {
+      document.getElementById('settings-drawer').classList.remove('hidden');
+      renderCustomChores();
+      renderCustomItems();
+    }
+
+    function closeSettingsDrawer() {
+      document.getElementById('settings-drawer').classList.add('hidden');
+    }
+
+    function switchSettingsTab(tab) {
+      currentSettingsTab = tab;
+
+      ['chores-edit', 'meals-edit', 'shopping-edit'].forEach(t => {
+        const btn = document.getElementById(`settings-tab-${t.split('-')[0]}`);
+        if (t === tab) {
+          btn.classList.add('bg-white', 'text-purple-600', 'shadow-sm');
+          btn.classList.remove('text-gray-600');
+        } else {
+          btn.classList.remove('bg-white', 'text-purple-600', 'shadow-sm');
+          btn.classList.add('text-gray-600');
+        }
+      });
+
+      document.getElementById('chores-editor').classList.toggle('hidden', tab !== 'chores-edit');
+      document.getElementById('meals-editor').classList.toggle('hidden', tab !== 'meals-edit');
+      document.getElementById('shopping-editor').classList.toggle('hidden', tab !== 'shopping-edit');
+    }
+
+    function renderCustomChores() {
+      const container = document.getElementById('custom-chores-list');
+
+      if (customChores.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No custom chores yet. Add your first one!</p>';
+        return;
+      }
+
+      container.innerHTML = customChores.map(chore => `
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-3 flex items-center gap-3">
+          <span class="text-2xl">${chore.icon}</span>
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800 text-sm">${chore.task}</p>
+            <p class="text-xs text-gray-500">${chore.day} • ${chore.time}</p>
+          </div>
+          <button onclick="deleteChore('${chore.id}')" class="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors text-sm">
+            ✕
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function renderCustomItems() {
+      const container = document.getElementById('custom-items-list');
+
+      if (customItems.length === 0) {
+        container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No custom items yet. Add your first one!</p>';
+        return;
+      }
+
+      container.innerHTML = customItems.map(item => `
+        <div class="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-3 flex items-center gap-3">
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
+            <p class="text-xs text-gray-500">${item.amount} • ${item.category}</p>
+          </div>
+          <span class="font-bold text-purple-600 text-sm">KES ${item.price}</span>
+          <button onclick="deleteItem('${item.id}')" class="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors text-sm">
+            ✕
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function showAddChoreForm() {
+      document.getElementById('add-chore-modal').classList.remove('hidden');
+    }
+
+    function closeAddChoreModal() {
+      document.getElementById('add-chore-modal').classList.add('hidden');
+    }
+
+    function handleAddChore(event) {
+      event.preventDefault();
+
+      const task = document.getElementById('chore-task').value;
+      const icon = document.getElementById('chore-icon').value;
+      const time = document.getElementById('chore-time').value;
+      const day = document.getElementById('chore-day').value;
+
+      customChores.push({
+        id: 'custom-' + Date.now(),
+        task,
+        icon,
+        time,
+        day
+      });
+
+      saveData();
+      closeAddChoreModal();
+      showToast('Chore added successfully!');
+      renderCustomChores();
+      document.getElementById('add-chore-form').reset();
+    }
+
+    function deleteChore(id) {
+      customChores = customChores.filter(c => c.id !== id);
+      saveData();
+      showToast('Chore deleted');
+      renderCustomChores();
+    }
+
+    function showAddItemForm() {
+      document.getElementById('add-item-modal').classList.remove('hidden');
+    }
+
+    function closeAddItemModal() {
+      document.getElementById('add-item-modal').classList.add('hidden');
+    }
+
+    function handleAddItem(event) {
+      event.preventDefault();
+
+      const name = document.getElementById('item-name').value;
+      const amount = document.getElementById('item-amount').value;
+      const price = parseInt(document.getElementById('item-price').value);
+      const category = document.getElementById('item-category').value;
+
+      customItems.push({
+        id: 'custom-item-' + Date.now(),
+        name,
+        amount,
+        price,
+        category
+      });
+
+      saveData();
+      closeAddItemModal();
+      showToast('Item added successfully!');
+      renderCustomItems();
+      document.getElementById('add-item-form').reset();
+    }
+
+    function deleteItem(id) {
+      customItems = customItems.filter(i => i.id !== id);
+      saveData();
+      showToast('Item deleted');
+      renderCustomItems();
+    }
+
+    // Close modals on backdrop click
+    document.getElementById('recipe-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'recipe-modal') closeRecipeModal();
+    });
+
+    document.getElementById('tips-drawer').addEventListener('click', (e) => {
+      if (e.target.id === 'tips-drawer') closeTipsDrawer();
+    });
+
+    document.getElementById('settings-drawer').addEventListener('click', (e) => {
+      if (e.target.id === 'settings-drawer') closeSettingsDrawer();
+    });
+
+    // Initialize app
+    function initApp() {
+      loadData();
+
+      if (selectedCountry) {
+        document.getElementById('country-selection').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        document.getElementById('country-flag').textContent = countryData[selectedCountry].flag;
+      }
+
+      renderCurrentView();
+    }
+
+    initApp();
+  </script>
+ </body>
+</html>
