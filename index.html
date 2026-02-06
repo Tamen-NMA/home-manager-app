@@ -124,9 +124,9 @@
       </div>
       <div class="bg-white rounded-2xl p-4 card-shadow border-2 border-purple-200">
        <div class="flex justify-between items-center">
-        <h3 class="font-bold text-gray-800 text-lg">Weekly Total</h3><span id="total-price" class="text-2xl font-extrabold text-purple-600">KES 0</span>
+        <h3 class="font-bold text-gray-800 text-lg">Weekly Total</h3><span id="total-price" class="text-2xl font-extrabold text-purple-600">0</span>
        </div>
-       <p class="text-xs text-gray-500 mt-1">Budget: ~KES 5,000</p>
+       <p id="budget-text" class="text-xs text-gray-500 mt-1">Budget: ~5,000</p>
       </div>
      </section>
     </main><!-- Recipe Modal -->
@@ -224,7 +224,7 @@
        </div>
        <div><label for="item-amount" class="block text-sm font-semibold text-gray-700 mb-1">Amount</label> <input type="text" id="item-amount" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="500ml" required>
        </div>
-       <div><label for="item-price" class="block text-sm font-semibold text-gray-700 mb-1">Price (KES)</label> <input type="number" id="item-price" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="350" required>
+       <div><label for="item-price" id="item-price-label" class="block text-sm font-semibold text-gray-700 mb-1">Price</label> <input type="number" id="item-price" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="350" required>
        </div>
        <div><label for="item-category" class="block text-sm font-semibold text-gray-700 mb-1">Category</label> <select id="item-category" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" required> <option value="staples">Staples</option> <option value="proteins">Proteins</option> <option value="vegetables">Vegetables</option> <option value="breakfast">Breakfast &amp; Snacks</option> <option value="basics">Cooking Basics</option> </select>
        </div>
@@ -232,43 +232,1044 @@
        </div>
       </form>
      </div>
+    </div><!-- Add Recipe Form Modal -->
+    <div id="add-recipe-modal" class="fixed inset-0 bg-black/50 hidden z-[60] flex items-center justify-center p-4">
+     <div class="bg-white rounded-3xl p-6 max-w-md w-full animate-in card-shadow max-h-[90vh] overflow-y-auto">
+      <h3 class="font-bold text-xl text-gray-800 mb-4">Add Recipe</h3>
+      <form id="add-recipe-form" onsubmit="handleAddRecipe(event)" class="space-y-3">
+       <div><label for="recipe-servings" class="block text-sm font-semibold text-gray-700 mb-1">Servings</label> <input type="number" id="recipe-servings" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="4" value="4" required>
+       </div>
+       <div>
+        <div class="flex justify-between items-center mb-2">
+         <label class="block text-sm font-semibold text-gray-700">Ingredients</label>
+         <button type="button" onclick="addIngredientField()" class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-lg font-semibold hover:bg-purple-200 transition-colors">+ Add</button>
+        </div>
+        <div id="ingredients-list" class="space-y-2">
+         <div class="ingredient-row flex gap-2">
+          <input type="text" class="ing-name flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Name" required>
+          <input type="text" class="ing-amount w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Amt" required>
+          <input type="number" class="ing-price w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Price" required>
+         </div>
+        </div>
+       </div>
+       <div>
+        <div class="flex justify-between items-center mb-2">
+         <label class="block text-sm font-semibold text-gray-700">Steps</label>
+         <button type="button" onclick="addStepField()" class="text-xs bg-purple-100 text-purple-600 px-2 py-1 rounded-lg font-semibold hover:bg-purple-200 transition-colors">+ Add</button>
+        </div>
+        <div id="steps-list" class="space-y-2">
+         <div class="step-row flex gap-2 items-center">
+          <span class="step-num w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">1</span>
+          <input type="text" class="step-text flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Step description" required>
+         </div>
+        </div>
+       </div>
+       <div class="flex gap-3 pt-2"><button type="button" onclick="closeAddRecipeModal()" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors text-sm"> Cancel </button> <button type="submit" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all text-sm"> Save Recipe </button>
+       </div>
+      </form>
+     </div>
     </div>
    </div>
   </div>
   <script>
-    // Country configuration
+    // Country configuration with meals, shopping, and monthly plans
     const countryData = {
       'Kenya': {
         flag: '🇰🇪',
         currency: 'KES',
+        budget: 5000,
         paymentMethods: [
           { name: 'M-Pesa', icon: '📱', color: 'from-green-500 to-green-600', number: '*123*456#' },
           { name: 'Airtel Money', icon: '💳', color: 'from-red-500 to-red-600', number: '*234*567#' }
-        ]
+        ],
+        meals: {
+          Monday: {
+            breakfast: { name: 'Uji (millet porridge) + Groundnuts', icon: '🥣', time: '15 min', snack: 'Orange' },
+            lunch: { name: 'Githeri (beans & maize) + Avocado', icon: '🫘', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Grilled Tilapia + Sukuma Wiki', icon: '🐟', time: '30 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Fresh tilapia', amount: '500g', price: 400 },
+                  { name: 'Sukuma wiki', amount: '2 bunches', price: 100 },
+                  { name: 'Tomatoes', amount: '300g', price: 45 },
+                  { name: 'Onions', amount: '200g', price: 30 },
+                  { name: 'Cooking oil', amount: '2 tbsp', price: 20 }
+                ],
+                steps: [
+                  'Clean and season the tilapia with salt and pepper',
+                  'Grill fish on both sides until cooked through',
+                  'Wash and chop sukuma wiki finely',
+                  'Sauté onions and tomatoes in oil',
+                  'Add sukuma wiki and cook until tender',
+                  'Serve grilled fish with sukuma wiki'
+                ]
+              }
+            }
+          },
+          Tuesday: {
+            breakfast: { name: '2 Boiled Eggs + Chai', icon: '🥚', time: '10 min', snack: 'Banana' },
+            lunch: { name: 'Ugali + Beef Stew', icon: '🍲', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Chapati + Ndengu', icon: '🫓', time: '40 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Wheat flour', amount: '500g', price: 80 },
+                  { name: 'Ndengu (green grams)', amount: '500g', price: 150 },
+                  { name: 'Onions', amount: '100g', price: 15 },
+                  { name: 'Tomatoes', amount: '200g', price: 30 },
+                  { name: 'Cooking oil', amount: '100ml', price: 30 }
+                ],
+                steps: [
+                  'Make chapati dough with flour, water, and salt',
+                  'Let dough rest for 30 minutes',
+                  'Boil ndengu until soft',
+                  'Fry onions and tomatoes, add ndengu',
+                  'Roll and cook chapatis on hot pan',
+                  'Serve chapati with ndengu stew'
+                ]
+              }
+            }
+          },
+          Wednesday: {
+            breakfast: { name: 'Mandazi + Tea', icon: '🍩', time: '20 min', snack: 'Orange' },
+            lunch: { name: 'Rice + Beans Stew', icon: '🍚', time: '40 min', snack: '' },
+            dinner: {
+              name: 'Mukimo + Fried Cabbage', icon: '🥔', time: '50 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Potatoes', amount: '1kg', price: 100 },
+                  { name: 'Maize kernels', amount: '200g', price: 40 },
+                  { name: 'Beans', amount: '200g', price: 40 },
+                  { name: 'Cabbage', amount: '1 head', price: 100 },
+                  { name: 'Pumpkin leaves', amount: '1 bunch', price: 30 }
+                ],
+                steps: [
+                  'Boil potatoes, maize, and beans until soft',
+                  'Mash together with pumpkin leaves',
+                  'Season with salt',
+                  'Shred and fry cabbage with onions',
+                  'Serve mukimo with fried cabbage'
+                ]
+              }
+            }
+          },
+          Thursday: {
+            breakfast: { name: 'Uji + Boiled Egg', icon: '🥣', time: '15 min', snack: 'Groundnuts' },
+            lunch: { name: 'Pilau + Kachumbari', icon: '🍚', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Fried Fish + Ugali', icon: '🐟', time: '35 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Omena', amount: '300g', price: 180 },
+                  { name: 'Maize flour', amount: '500g', price: 75 },
+                  { name: 'Tomatoes', amount: '200g', price: 30 },
+                  { name: 'Onions', amount: '100g', price: 15 },
+                  { name: 'Cooking oil', amount: '3 tbsp', price: 25 }
+                ],
+                steps: [
+                  'Clean omena and remove any debris',
+                  'Fry onions until golden, add tomatoes',
+                  'Add omena and cook until crispy',
+                  'Prepare ugali with maize flour and water',
+                  'Serve omena with ugali'
+                ]
+              }
+            }
+          },
+          Friday: {
+            breakfast: { name: 'Sweet Potatoes + Tea', icon: '🍠', time: '20 min', snack: 'Banana' },
+            lunch: { name: 'Matoke + Beans', icon: '🍌', time: '50 min', snack: '' },
+            dinner: {
+              name: 'Chicken Stew + Rice', icon: '🍗', time: '1 hr',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Chicken (kienyeji)', amount: '500g', price: 300 },
+                  { name: 'Rice', amount: '500g', price: 100 },
+                  { name: 'Tomatoes', amount: '300g', price: 45 },
+                  { name: 'Onions', amount: '200g', price: 30 },
+                  { name: 'Garlic & ginger', amount: '50g', price: 20 }
+                ],
+                steps: [
+                  'Cut chicken into pieces and season',
+                  'Fry onions, garlic, and ginger',
+                  'Add chicken and brown all sides',
+                  'Add tomatoes and water, simmer until done',
+                  'Cook rice separately',
+                  'Serve chicken stew over rice'
+                ]
+              }
+            }
+          },
+          Saturday: {
+            breakfast: { name: '2 Boiled Eggs + Chapati', icon: '🥚', time: '15 min', snack: 'Orange' },
+            lunch: { name: 'Nyama Choma + Ugali + Kachumbari', icon: '🥩', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Vegetable Stir-fry + Chapati', icon: '🥗', time: '25 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Cabbage', amount: '300g', price: 50 },
+                  { name: 'Carrots', amount: '200g', price: 20 },
+                  { name: 'Onions', amount: '150g', price: 23 },
+                  { name: 'Wheat flour', amount: '300g', price: 50 },
+                  { name: 'Cooking oil', amount: '100ml', price: 30 }
+                ],
+                steps: [
+                  'Shred cabbage and slice carrots',
+                  'Make chapati dough and let rest',
+                  'Heat oil in a large pan',
+                  'Add onions and fry until translucent',
+                  'Add carrots and cabbage, stir-fry quickly',
+                  'Cook chapatis and serve with vegetables'
+                ]
+              }
+            }
+          },
+          Sunday: {
+            breakfast: { name: 'Pancakes + Chai', icon: '🥞', time: '20 min', snack: 'Banana' },
+            lunch: { name: 'Biriani + Salad', icon: '🍚', time: '1.5 hrs', snack: 'Sweet potato' },
+            dinner: {
+              name: 'Chicken Soup + Chapati', icon: '🍲', time: '1.5 hrs',
+              recipe: {
+                servings: 6,
+                ingredients: [
+                  { name: 'Chicken (kienyeji)', amount: '1kg', price: 600 },
+                  { name: 'Potatoes', amount: '500g', price: 50 },
+                  { name: 'Carrots', amount: '300g', price: 30 },
+                  { name: 'Onions', amount: '200g', price: 30 },
+                  { name: 'Wheat flour', amount: '300g', price: 50 }
+                ],
+                steps: [
+                  'Cut chicken and boil until very tender',
+                  'Add potatoes and carrots to soup',
+                  'Season with salt and pepper',
+                  'Simmer until vegetables are cooked',
+                  'Prepare chapatis separately',
+                  'Serve hot soup with chapati'
+                ]
+              }
+            }
+          }
+        },
+        monthlyMealPlan: {
+          week1: {
+            Monday: { breakfast: 'Smoothie mango banana', lunch: 'Braised fish & fish fillet with roasted potatoes', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🐟', supperIcon: '' },
+            Tuesday: { breakfast: 'Tea ginger lemon', lunch: 'Ugali, greens & meat', supper: '', snacks: 'Apples/pear', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+            Wednesday: { breakfast: 'Smoothie pineapple celery', lunch: 'Chinese cabbage, pak choi & pork', supper: 'Same as lunch', snacks: 'Avocado & carrot salad', breakfastIcon: '🥤', lunchIcon: '🥬', supperIcon: '🥬' },
+            Thursday: { breakfast: 'Smoothie ananas ginger', lunch: 'Githeri', supper: 'Same as lunch', snacks: 'Cashew nuts and tangerine', breakfastIcon: '🥤', lunchIcon: '🫘', supperIcon: '🫘' },
+            Friday: { breakfast: 'Mango chia pudding', lunch: 'Chicken with sautéed vegetables', supper: '', snacks: 'Apple cake', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
+            Saturday: { breakfast: 'Spanish omelette', lunch: 'Rice + stew with peas and minced meat + sautéed carrot and cabbage', supper: 'Avocado', snacks: 'Samosa', breakfastIcon: '🍳', lunchIcon: '🍚', supperIcon: '🥑' },
+            Sunday: { breakfast: 'Pancakes, avocado toast, boiled egg & tea', lunch: 'Grilled fish and plantains', supper: '', snacks: '', breakfastIcon: '🥞', lunchIcon: '🐟', supperIcon: '' }
+          },
+          week2: {
+            Monday: { breakfast: '', lunch: 'Braised fish & fish fillet with roasted potatoes', supper: '', snacks: '', breakfastIcon: '', lunchIcon: '🐟', supperIcon: '' },
+            Tuesday: { breakfast: 'Tea', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+            Wednesday: { breakfast: 'Smoothie', lunch: 'Chinese cabbage, pak choi & pork', supper: '', snacks: 'Avocado & carrot salad', breakfastIcon: '🥤', lunchIcon: '🥬', supperIcon: '' },
+            Thursday: { breakfast: 'Smoothie', lunch: 'Githeri', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🫘', supperIcon: '' },
+            Friday: { breakfast: 'Mango chia pudding', lunch: 'Chicken with sautéed vegetables', supper: '', snacks: 'Apple cake', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
+            Saturday: { breakfast: 'Spanish omelette', lunch: 'Avocado salad', supper: '', snacks: 'Samosa', breakfastIcon: '🍳', lunchIcon: '🥗', supperIcon: '' },
+            Sunday: { breakfast: 'Pancakes & tea', lunch: 'Puff-puff & beans', supper: '', snacks: '', breakfastIcon: '🥞', lunchIcon: '🍩', supperIcon: '' }
+          },
+          week3: {
+            Monday: { breakfast: 'Green smoothie', lunch: 'Broccoli pasta & fried chicken', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍝', supperIcon: '' },
+            Tuesday: { breakfast: '', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '', lunchIcon: '🍲', supperIcon: '' },
+            Wednesday: { breakfast: 'Brewed tea', lunch: 'Chapati, lentils & steamed cabbage', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🫓', supperIcon: '' },
+            Thursday: { breakfast: 'Smoothie', lunch: 'Pilau, banana & kachumbari', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍚', supperIcon: '' },
+            Friday: { breakfast: 'Vegetable smoothie & oat-banana pancake', lunch: 'Chicken stew & rice', supper: '', snacks: 'Mandazi', breakfastIcon: '🥤', lunchIcon: '🍗', supperIcon: '' },
+            Saturday: { breakfast: 'Spanish omelette', lunch: 'Biriyani rice', supper: '', snacks: 'Mandazi', breakfastIcon: '🍳', lunchIcon: '🍚', supperIcon: '' },
+            Sunday: { breakfast: 'Banana bread & tea', lunch: 'Samosa & salad', supper: '', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥟', supperIcon: '' }
+          },
+          week4: {
+            Monday: { breakfast: 'Green smoothie', lunch: 'Samosa & salad', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🥟', supperIcon: '' },
+            Tuesday: { breakfast: 'Tea', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+            Wednesday: { breakfast: 'Smoothie', lunch: 'Sweet potatoes & butternut squash', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍠', supperIcon: '' },
+            Thursday: { breakfast: 'Smoothie', lunch: 'Pilau, banana & kachumbari', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍚', supperIcon: '' },
+            Friday: { breakfast: 'Avocado toast & egg', lunch: 'Plantain & chicken', supper: '', snacks: 'Carrot cake', breakfastIcon: '🥑', lunchIcon: '🍌', supperIcon: '' },
+            Saturday: { breakfast: 'Spanish omelette', lunch: 'Liver salad', supper: '', snacks: 'Mandazi', breakfastIcon: '🍳', lunchIcon: '🥗', supperIcon: '' },
+            Sunday: { breakfast: 'Banana bread & tea', lunch: 'Samosa & salad', supper: 'Salad', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥟', supperIcon: '🥗' }
+          }
+        },
+        shopping: {
+          staples: [
+            { id: 'ke-maize-flour', name: 'Maize flour (Ugali)', amount: '2kg', price: 300 },
+            { id: 'ke-rice', name: 'Rice', amount: '2kg', price: 400 },
+            { id: 'ke-dry-beans', name: 'Dry beans', amount: '2kg', price: 400 },
+            { id: 'ke-ndengu', name: 'Ndengu (green grams)', amount: '1kg', price: 300 },
+            { id: 'ke-potatoes', name: 'Potatoes', amount: '3kg', price: 300 },
+            { id: 'ke-sweet-potatoes', name: 'Sweet potatoes', amount: '3kg', price: 300 }
+          ],
+          proteins: [
+            { id: 'ke-eggs', name: 'Eggs', amount: '30 eggs', price: 450 },
+            { id: 'ke-omena', name: 'Omena', amount: '500g', price: 300 },
+            { id: 'ke-chicken', name: 'Chicken (kienyeji)', amount: '1kg', price: 600 }
+          ],
+          vegetables: [
+            { id: 'ke-sukuma', name: 'Sukuma wiki', amount: '3 bunches', price: 150 },
+            { id: 'ke-cabbage', name: 'Cabbage', amount: '1 large', price: 150 },
+            { id: 'ke-tomatoes', name: 'Tomatoes', amount: '1kg', price: 150 },
+            { id: 'ke-onions', name: 'Onions', amount: '1kg', price: 150 },
+            { id: 'ke-carrots', name: 'Carrots', amount: '1kg', price: 100 }
+          ],
+          breakfast: [
+            { id: 'ke-millet', name: 'Millet flour (uji)', amount: '1kg', price: 200 },
+            { id: 'ke-bananas', name: 'Bananas', amount: '1 dozen', price: 150 },
+            { id: 'ke-groundnuts', name: 'Groundnuts', amount: '500g', price: 200 }
+          ],
+          basics: [
+            { id: 'ke-oil', name: 'Cooking oil', amount: '1L', price: 250 },
+            { id: 'ke-spices', name: 'Salt & spices', amount: '1 pack', price: 100 }
+          ]
+        }
       },
       'Ivory Coast': {
         flag: '🇨🇮',
         currency: 'XOF',
+        budget: 25000,
         paymentMethods: [
           { name: 'Wave', icon: '🌊', color: 'from-blue-500 to-blue-600', number: '*123*1#' },
           { name: 'Orange Money', icon: '🍊', color: 'from-orange-500 to-orange-600', number: '#144#' }
-        ]
+        ],
+        meals: {
+          Monday: {
+            breakfast: { name: 'Bouillie de mil + Pain', icon: '🥣', time: '15 min', snack: 'Orange' },
+            lunch: { name: 'Riz + Sauce Arachide', icon: '🍚', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Poisson Braisé + Attiéké', icon: '🐟', time: '30 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Poisson frais', amount: '500g', price: 2000 },
+                  { name: 'Attiéké', amount: '500g', price: 500 },
+                  { name: 'Tomates', amount: '300g', price: 300 },
+                  { name: 'Oignons', amount: '200g', price: 200 },
+                  { name: 'Huile', amount: '100ml', price: 300 }
+                ],
+                steps: [
+                  'Nettoyer et assaisonner le poisson',
+                  'Braiser le poisson sur le grill',
+                  'Préparer la sauce tomate-oignon',
+                  'Réchauffer l\'attiéké à la vapeur',
+                  'Servir le poisson avec attiéké et sauce'
+                ]
+              }
+            }
+          },
+          Tuesday: {
+            breakfast: { name: 'Oeufs + Pain beurré', icon: '🥚', time: '10 min', snack: 'Banane' },
+            lunch: { name: 'Foutou Banane + Sauce Graine', icon: '🍌', time: '50 min', snack: '' },
+            dinner: {
+              name: 'Soupe de Poisson', icon: '🍲', time: '40 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Poisson fumé', amount: '300g', price: 1500 },
+                  { name: 'Légumes assortis', amount: '500g', price: 500 },
+                  { name: 'Tomates', amount: '200g', price: 200 },
+                  { name: 'Piment', amount: '50g', price: 100 },
+                  { name: 'Sel & épices', amount: 'au goût', price: 100 }
+                ],
+                steps: [
+                  'Faire bouillir l\'eau avec les épices',
+                  'Ajouter le poisson fumé',
+                  'Ajouter les légumes coupés',
+                  'Laisser mijoter 30 minutes',
+                  'Assaisonner et servir chaud'
+                ]
+              }
+            }
+          },
+          Wednesday: {
+            breakfast: { name: 'Bouillie de riz + Sucre', icon: '🥣', time: '15 min', snack: 'Mangue' },
+            lunch: { name: 'Riz + Sauce Aubergine', icon: '🍚', time: '40 min', snack: '' },
+            dinner: {
+              name: 'Alloco + Poisson Frit', icon: '🍌', time: '30 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Bananes plantain', amount: '6 pièces', price: 600 },
+                  { name: 'Poisson', amount: '400g', price: 1600 },
+                  { name: 'Huile de friture', amount: '500ml', price: 800 },
+                  { name: 'Piment', amount: '50g', price: 100 },
+                  { name: 'Sel', amount: 'au goût', price: 50 }
+                ],
+                steps: [
+                  'Éplucher et couper les plantains',
+                  'Faire frire les plantains jusqu\'à dorés',
+                  'Assaisonner et frire le poisson',
+                  'Servir alloco avec poisson et piment'
+                ]
+              }
+            }
+          },
+          Thursday: {
+            breakfast: { name: 'Pain + Omelette', icon: '🍳', time: '15 min', snack: 'Orange' },
+            lunch: { name: 'Attiéké + Poulet Braisé', icon: '🍗', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Placali + Sauce Gombo', icon: '🥘', time: '45 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Farine de manioc', amount: '500g', price: 400 },
+                  { name: 'Gombo frais', amount: '300g', price: 400 },
+                  { name: 'Poisson fumé', amount: '200g', price: 1000 },
+                  { name: 'Huile de palme', amount: '100ml', price: 300 },
+                  { name: 'Sel & épices', amount: 'au goût', price: 100 }
+                ],
+                steps: [
+                  'Préparer le placali avec farine et eau',
+                  'Laver et couper le gombo',
+                  'Faire revenir avec huile de palme',
+                  'Ajouter le poisson fumé',
+                  'Servir placali avec sauce gombo'
+                ]
+              }
+            }
+          },
+          Friday: {
+            breakfast: { name: 'Café + Pain', icon: '☕', time: '10 min', snack: 'Banane' },
+            lunch: { name: 'Riz Gras + Poulet', icon: '🍚', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Garba (Attiéké + Thon)', icon: '🐟', time: '20 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Attiéké', amount: '500g', price: 500 },
+                  { name: 'Thon frit', amount: '300g', price: 1200 },
+                  { name: 'Oignons', amount: '100g', price: 100 },
+                  { name: 'Tomates', amount: '100g', price: 100 },
+                  { name: 'Piment & cube', amount: 'au goût', price: 100 }
+                ],
+                steps: [
+                  'Émietter l\'attiéké',
+                  'Faire frire le thon en morceaux',
+                  'Couper oignons et tomates',
+                  'Mélanger attiéké avec condiments',
+                  'Servir avec thon frit et piment'
+                ]
+              }
+            }
+          },
+          Saturday: {
+            breakfast: { name: 'Omelette + Pain', icon: '🥚', time: '15 min', snack: 'Mangue' },
+            lunch: { name: 'Kédjénou de Poulet + Riz', icon: '🍗', time: '1.5 hrs', snack: '' },
+            dinner: {
+              name: 'Foutou Igname + Sauce Claire', icon: '🥔', time: '40 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Igname', amount: '1kg', price: 800 },
+                  { name: 'Poisson', amount: '300g', price: 1200 },
+                  { name: 'Aubergines', amount: '200g', price: 200 },
+                  { name: 'Tomates', amount: '200g', price: 200 },
+                  { name: 'Huile', amount: '50ml', price: 150 }
+                ],
+                steps: [
+                  'Éplucher et bouillir l\'igname',
+                  'Piler jusqu\'à obtenir le foutou',
+                  'Préparer la sauce claire avec légumes',
+                  'Ajouter le poisson',
+                  'Servir foutou avec sauce'
+                ]
+              }
+            }
+          },
+          Sunday: {
+            breakfast: { name: 'Croissant + Café au lait', icon: '🥐', time: '10 min', snack: 'Fruits' },
+            lunch: { name: 'Poulet DG', icon: '🍗', time: '1.5 hrs', snack: 'Jus naturel' },
+            dinner: {
+              name: 'Soupe Ivoirienne', icon: '🍲', time: '1 hr',
+              recipe: {
+                servings: 6,
+                ingredients: [
+                  { name: 'Viande de boeuf', amount: '500g', price: 2500 },
+                  { name: 'Légumes variés', amount: '500g', price: 500 },
+                  { name: 'Manioc', amount: '300g', price: 300 },
+                  { name: 'Banane plantain', amount: '2 pièces', price: 200 },
+                  { name: 'Épices locales', amount: 'au goût', price: 200 }
+                ],
+                steps: [
+                  'Faire bouillir la viande jusqu\'à tendreté',
+                  'Ajouter manioc et plantain',
+                  'Ajouter les légumes',
+                  'Assaisonner avec épices locales',
+                  'Laisser mijoter et servir chaud'
+                ]
+              }
+            }
+          }
+        },
+        monthlyMealPlan: {
+          week1: {
+            Monday: { breakfast: 'Smoothie mangue, banane & épinards', lunch: 'Poisson braisé & attiéké vapeur avec salade crudités', supper: '', snacks: 'Pommes', breakfastIcon: '🥤', lunchIcon: '🐟', supperIcon: '' },
+            Tuesday: { breakfast: 'Thé gingembre-citron & œuf dur', lunch: 'Bouillon de légumes avec bœuf maigre', supper: '', snacks: 'Poire', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
+            Wednesday: { breakfast: 'Smoothie ananas, céleri & concombre', lunch: 'Placali avec sauce gombo légère au poisson fumé', supper: '', snacks: 'Yaourt nature écrémé', breakfastIcon: '🥤', lunchIcon: '🥘', supperIcon: '' },
+            Thursday: { breakfast: 'Avoine cuite à l\'eau & baies', lunch: 'Poulet braisé, alloco au four, haricots verts', supper: '', snacks: 'Noix de cajou', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
+            Friday: { breakfast: 'Avocat sur pain complet', lunch: 'Riz brun sauté aux légumes & crevettes', supper: '', snacks: 'Pastèque', breakfastIcon: '🥑', lunchIcon: '🍚', supperIcon: '' },
+            Saturday: { breakfast: 'Smoothie vert (épinards, ananas, eau coco)', lunch: 'Brochettes poulet/légumes grillées avec couscous complet', supper: '', snacks: 'Fruits de la passion', breakfastIcon: '🥤', lunchIcon: '🍗', supperIcon: '' },
+            Sunday: { breakfast: 'Omelette aux légumes', lunch: 'Kedjenou de poulet avec légumes & attiéké', supper: '', snacks: 'Orange', breakfastIcon: '🍳', lunchIcon: '🍗', supperIcon: '' }
+          },
+          week2: {
+            Monday: { breakfast: 'Flocons d\'avoine & lait d\'amande', lunch: 'Salade composée : poulet grillé, avocat, champignons, légumes verts', supper: '', snacks: 'Clémentine', breakfastIcon: '🥣', lunchIcon: '🥗', supperIcon: '' },
+            Tuesday: { breakfast: 'Thé & tartine pain complet, fromage frais allégé', lunch: 'Poisson vapeur (maquereau/thon), patates douces vapeur, courgettes', supper: '', snacks: 'Concombre en bâtonnets', breakfastIcon: '☕', lunchIcon: '🐟', supperIcon: '' },
+            Wednesday: { breakfast: 'Yaourt grec allégé & graines de chia', lunch: 'Sauce feuille (feuilles de patate douce, épinards) avec poisson', supper: '', snacks: 'Banane', breakfastIcon: '🥛', lunchIcon: '🥬', supperIcon: '' },
+            Thursday: { breakfast: 'Smoothie mangue & épinards', lunch: 'Galette de quinoa, radis noir & carottes râpées', supper: '', snacks: 'Amandes', breakfastIcon: '🥤', lunchIcon: '🥗', supperIcon: '' },
+            Friday: { breakfast: 'Œufs brouillés aux légumes', lunch: 'Thiof (poisson) à la vapeur & fonio avec légumes variés', supper: '', snacks: 'Ananas', breakfastIcon: '🍳', lunchIcon: '🐟', supperIcon: '' },
+            Saturday: { breakfast: 'Pain complet, beurre d\'arachide & rondelles de banane', lunch: 'Sauce claire d\'aubergines au bœuf maigre & riz complet', supper: '', snacks: 'Melon', breakfastIcon: '🍞', lunchIcon: '🍆', supperIcon: '' },
+            Sunday: { breakfast: 'Crêpe fine farine complète avec compote de fruits', lunch: 'Poisson braisé & igname vapeur avec sauce tomate légère', supper: '', snacks: 'Mangue', breakfastIcon: '🥞', lunchIcon: '🐟', supperIcon: '' }
+          },
+          week3: {
+            Monday: { breakfast: 'Smoothie fruits rouges & eau', lunch: 'Salade de haricots azukis, légumes croquants & vinaigrette légère', supper: '', snacks: 'Kiwi', breakfastIcon: '🥤', lunchIcon: '🥗', supperIcon: '' },
+            Tuesday: { breakfast: 'Thé vert & un fruit de saison', lunch: 'Poulet sauté aux légumes asiatiques (pak choi, chou chinois) & nouilles de riz', supper: '', snacks: 'Raisin', breakfastIcon: '🍵', lunchIcon: '🍗', supperIcon: '' },
+            Wednesday: { breakfast: 'Avoine & lait écrémé, morceaux de pêche', lunch: 'Gratin de riz aux courgettes & jambon de volaille', supper: '', snacks: 'Pomme', breakfastIcon: '🥣', lunchIcon: '🍚', supperIcon: '' },
+            Thursday: { breakfast: 'Pain complet grillé, avocat, œuf poché', lunch: 'Bœuf carottes (maigre) aux épices & boulgour', supper: '', snacks: 'Fruits secs (abricots, figues)', breakfastIcon: '🍞', lunchIcon: '🥩', supperIcon: '' },
+            Friday: { breakfast: 'Smoothie ananas, menthe, concombre', lunch: 'Tofaye aux poireaux (version légère au tofu fumé) & pommes de terre vapeur', supper: '', snacks: 'Orange', breakfastIcon: '🥤', lunchIcon: '🥔', supperIcon: '' },
+            Saturday: { breakfast: 'Yaourt nature, miel, noix', lunch: 'Saumon sur un lit de poireaux fondus', supper: '', snacks: 'Fraises', breakfastIcon: '🥛', lunchIcon: '🐟', supperIcon: '' },
+            Sunday: { breakfast: 'Omelette blanche aux fines herbes', lunch: 'Attiéké avec poisson frais grillé & sauce pimentée aux oignons', supper: '', snacks: 'Goyave', breakfastIcon: '🍳', lunchIcon: '🐟', supperIcon: '' }
+          },
+          week4: {
+            Monday: { breakfast: 'Smoothie vert (épinards, concombre, citron)', lunch: 'Pâtes complètes aux légumes grillés (aubergines, poivrons) & basilic', supper: '', snacks: 'Pamplemousse', breakfastIcon: '🥤', lunchIcon: '🍝', supperIcon: '' },
+            Tuesday: { breakfast: 'Thé & pain complet, œuf dur', lunch: 'Ragoût de mouton (maigre) aux légumes racines & semoule complète', supper: '', snacks: 'Mandarine', breakfastIcon: '☕', lunchIcon: '🍖', supperIcon: '' },
+            Wednesday: { breakfast: 'Flocons d\'avoine & fruits frais', lunch: 'Sauce arachide (légère) au poulet & riz blanc vapeur', supper: '', snacks: 'Fruits de la passion', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
+            Thursday: { breakfast: 'Yaourt nature & graines de lin', lunch: 'Poisson à la sauce tomate fraîche (style garba amélioré) & attiéké', supper: '', snacks: 'Pomme', breakfastIcon: '🥛', lunchIcon: '🐟', supperIcon: '' },
+            Friday: { breakfast: 'Galette de riz complet & purée d\'amande', lunch: 'Wok de légumes variés & tofu nature', supper: '', snacks: 'Baies mélangées', breakfastIcon: '🍘', lunchIcon: '🥗', supperIcon: '' },
+            Saturday: { breakfast: 'Omelette aux champignons', lunch: 'Reste du wok ou salade composée de la semaine', supper: '', snacks: 'Poire', breakfastIcon: '🍳', lunchIcon: '🥗', supperIcon: '' },
+            Sunday: { breakfast: 'Brunch léger : salade de fruits, œuf à la coque, pain complet', lunch: 'Dîner libre contrôlé (repas plaisir)', supper: '', snacks: 'Mangue', breakfastIcon: '🍳', lunchIcon: '🍽️', supperIcon: '' }
+          }
+        },
+        shopping: {
+          staples: [
+            { id: 'ci-rice', name: 'Riz local', amount: '5kg', price: 2500 },
+            { id: 'ci-attieke', name: 'Attiéké', amount: '2kg', price: 1000 },
+            { id: 'ci-plantain', name: 'Bananes plantain', amount: '1 régime', price: 1500 },
+            { id: 'ci-yam', name: 'Igname', amount: '3kg', price: 1500 },
+            { id: 'ci-cassava', name: 'Manioc', amount: '2kg', price: 800 }
+          ],
+          proteins: [
+            { id: 'ci-eggs', name: 'Oeufs', amount: '30 oeufs', price: 3000 },
+            { id: 'ci-chicken', name: 'Poulet', amount: '1.5kg', price: 4500 },
+            { id: 'ci-fish', name: 'Poisson frais', amount: '1kg', price: 3500 },
+            { id: 'ci-smoked-fish', name: 'Poisson fumé', amount: '500g', price: 2500 }
+          ],
+          vegetables: [
+            { id: 'ci-tomatoes', name: 'Tomates', amount: '2kg', price: 1000 },
+            { id: 'ci-onions', name: 'Oignons', amount: '1kg', price: 500 },
+            { id: 'ci-okra', name: 'Gombo', amount: '500g', price: 500 },
+            { id: 'ci-eggplant', name: 'Aubergines', amount: '500g', price: 400 },
+            { id: 'ci-peppers', name: 'Piments', amount: '200g', price: 300 }
+          ],
+          breakfast: [
+            { id: 'ci-bread', name: 'Pain', amount: '7 baguettes', price: 1750 },
+            { id: 'ci-milk', name: 'Lait en poudre', amount: '400g', price: 2000 },
+            { id: 'ci-coffee', name: 'Café/Nescafé', amount: '200g', price: 1500 }
+          ],
+          basics: [
+            { id: 'ci-palm-oil', name: 'Huile de palme', amount: '1L', price: 1500 },
+            { id: 'ci-oil', name: 'Huile végétale', amount: '1L', price: 1200 },
+            { id: 'ci-spices', name: 'Épices & cubes', amount: '1 lot', price: 500 }
+          ]
+        }
       },
       'Cameroon': {
         flag: '🇨🇲',
         currency: 'XAF',
+        budget: 25000,
         paymentMethods: [
           { name: 'Orange Money', icon: '🍊', color: 'from-orange-500 to-orange-600', number: '#150#' },
           { name: 'MTN Mobile Money', icon: '📱', color: 'from-yellow-500 to-yellow-600', number: '*126#' }
-        ]
+        ],
+        meals: {
+          Monday: {
+            breakfast: { name: 'Bouillie de maïs + Beignets', icon: '🥣', time: '20 min', snack: 'Orange' },
+            lunch: { name: 'Riz + Sauce Tomate + Poisson', icon: '🍚', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Ndolé + Plantain', icon: '🥬', time: '1 hr',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Feuilles de ndolé', amount: '500g', price: 800 },
+                  { name: 'Arachides moulues', amount: '200g', price: 400 },
+                  { name: 'Crevettes séchées', amount: '100g', price: 600 },
+                  { name: 'Plantain', amount: '4 doigts', price: 400 },
+                  { name: 'Huile', amount: '100ml', price: 200 }
+                ],
+                steps: [
+                  'Laver et faire bouillir les feuilles de ndolé',
+                  'Presser pour enlever l\'amertume',
+                  'Faire revenir avec arachides et crevettes',
+                  'Ajouter huile et assaisonner',
+                  'Faire bouillir ou griller le plantain',
+                  'Servir le ndolé avec plantain'
+                ]
+              }
+            }
+          },
+          Tuesday: {
+            breakfast: { name: '2 Oeufs bouillis + Pain', icon: '🥚', time: '10 min', snack: 'Banane' },
+            lunch: { name: 'Eru + Water Fufu', icon: '🥬', time: '1.5 hrs', snack: '' },
+            dinner: {
+              name: 'Omelette + Pain', icon: '🍳', time: '15 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Oeufs', amount: '6 oeufs', price: 600 },
+                  { name: 'Oignons', amount: '100g', price: 100 },
+                  { name: 'Tomates', amount: '100g', price: 100 },
+                  { name: 'Pain', amount: '2 baguettes', price: 500 },
+                  { name: 'Huile', amount: '2 c.s.', price: 50 }
+                ],
+                steps: [
+                  'Battre les oeufs avec sel',
+                  'Hacher oignons et tomates',
+                  'Mélanger aux oeufs',
+                  'Faire cuire l\'omelette',
+                  'Servir avec pain frais'
+                ]
+              }
+            }
+          },
+          Wednesday: {
+            breakfast: { name: 'Bouillie d\'avoine + Banane', icon: '🥣', time: '10 min', snack: 'Orange' },
+            lunch: { name: 'Haricots + Plantain Mûr', icon: '🫘', time: '50 min', snack: '' },
+            dinner: {
+              name: 'Poisson Braisé + Bâton de Manioc', icon: '🐟', time: '40 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Poisson (bar ou maquereau)', amount: '600g', price: 1500 },
+                  { name: 'Bâton de manioc', amount: '4 pièces', price: 400 },
+                  { name: 'Tomates', amount: '200g', price: 150 },
+                  { name: 'Oignons', amount: '150g', price: 100 },
+                  { name: 'Piment & épices', amount: 'au goût', price: 100 }
+                ],
+                steps: [
+                  'Nettoyer et assaisonner le poisson',
+                  'Préparer la sauce avec tomates et oignons',
+                  'Braiser le poisson sur le grill',
+                  'Réchauffer le bâton de manioc',
+                  'Servir poisson avec sauce et manioc'
+                ]
+              }
+            }
+          },
+          Thursday: {
+            breakfast: { name: 'Bouillie + 1 Oeuf', icon: '🥣', time: '15 min', snack: 'Arachides' },
+            lunch: { name: 'Riz + Sauce Arachide + Poulet', icon: '🍚', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Koki + Plantain', icon: '🫘', time: '1.5 hrs',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Haricots blancs', amount: '500g', price: 500 },
+                  { name: 'Huile de palme', amount: '200ml', price: 400 },
+                  { name: 'Feuilles de bananier', amount: '6 feuilles', price: 200 },
+                  { name: 'Plantain', amount: '4 doigts', price: 400 },
+                  { name: 'Sel & épices', amount: 'au goût', price: 100 }
+                ],
+                steps: [
+                  'Tremper et moudre les haricots',
+                  'Mélanger avec huile de palme et sel',
+                  'Envelopper dans feuilles de bananier',
+                  'Cuire à la vapeur 2 heures',
+                  'Servir avec plantain grillé'
+                ]
+              }
+            }
+          },
+          Friday: {
+            breakfast: { name: 'Beignets + Bouillie', icon: '🍩', time: '20 min', snack: 'Banane' },
+            lunch: { name: 'Fufu de Maïs + Sauce Jaune', icon: '🍲', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Sanga + Légumes', icon: '🌽', time: '45 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Maïs frais', amount: '500g', price: 400 },
+                  { name: 'Haricots', amount: '200g', price: 200 },
+                  { name: 'Feuilles de manioc', amount: '300g', price: 200 },
+                  { name: 'Huile de palme', amount: '100ml', price: 200 },
+                  { name: 'Sel', amount: 'au goût', price: 50 }
+                ],
+                steps: [
+                  'Faire bouillir maïs et haricots ensemble',
+                  'Écraser légèrement',
+                  'Préparer les feuilles de manioc',
+                  'Servir sanga avec légumes sautés'
+                ]
+              }
+            }
+          },
+          Saturday: {
+            breakfast: { name: '2 Oeufs + Beignets', icon: '🥚', time: '15 min', snack: 'Orange' },
+            lunch: { name: 'Poulet DG', icon: '🍗', time: '1.5 hrs', snack: '' },
+            dinner: {
+              name: 'Mbongo Tchobi + Riz', icon: '🍲', time: '1.5 hrs',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Poisson ou viande', amount: '500g', price: 1500 },
+                  { name: 'Épices mbongo', amount: '100g', price: 500 },
+                  { name: 'Riz', amount: '500g', price: 400 },
+                  { name: 'Oignons', amount: '150g', price: 100 },
+                  { name: 'Huile', amount: '100ml', price: 200 }
+                ],
+                steps: [
+                  'Griller les épices mbongo',
+                  'Moudre finement',
+                  'Assaisonner la viande/poisson',
+                  'Cuire dans sauce noire épicée',
+                  'Servir avec riz blanc'
+                ]
+              }
+            }
+          },
+          Sunday: {
+            breakfast: { name: 'Croissants + Café au lait', icon: '🥐', time: '10 min', snack: 'Fruits' },
+            lunch: { name: 'Kondré + Plantain', icon: '🍌', time: '2 hrs', snack: 'Jus naturel' },
+            dinner: {
+              name: 'Soupe Pépé', icon: '🍲', time: '1 hr',
+              recipe: {
+                servings: 6,
+                ingredients: [
+                  { name: 'Viande de boeuf', amount: '500g', price: 2000 },
+                  { name: 'Légumes variés', amount: '500g', price: 400 },
+                  { name: 'Plantain vert', amount: '2 doigts', price: 200 },
+                  { name: 'Macabo', amount: '300g', price: 300 },
+                  { name: 'Épices', amount: 'au goût', price: 200 }
+                ],
+                steps: [
+                  'Faire bouillir la viande',
+                  'Ajouter plantain et macabo',
+                  'Ajouter les légumes',
+                  'Assaisonner et laisser mijoter',
+                  'Servir bien chaud'
+                ]
+              }
+            }
+          }
+        },
+        monthlyMealPlan: {
+          week1: {
+            Monday: { breakfast: 'Pap + akara', lunch: 'Ndolé + boiled plantain', supper: 'Light vegetable soup + fish', snacks: '', breakfastIcon: '🥣', lunchIcon: '🥬', supperIcon: '🍲' },
+            Tuesday: { breakfast: 'Bread + omelette + tea', lunch: 'Pomme/plantain pilé haricot', supper: 'Light vegetable soup', snacks: '', breakfastIcon: '🍞', lunchIcon: '🍌', supperIcon: '🍲' },
+            Wednesday: { breakfast: 'Bread and butter', lunch: 'Eru + garri', supper: 'Tapioca arachide', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥬', supperIcon: '🥜' },
+            Thursday: { breakfast: 'Oats with milk', lunch: 'Egusi soup + fufu corn', supper: 'Leftover egusi (small fufu)', snacks: '', breakfastIcon: '🥣', lunchIcon: '🍲', supperIcon: '🍲' },
+            Friday: { breakfast: 'Fried yam + eggs', lunch: 'Fried rice + chicken', supper: 'Grilled fish + vegetables', snacks: '', breakfastIcon: '🍠', lunchIcon: '🍚', supperIcon: '🐟' },
+            Saturday: { breakfast: 'Bouillie', lunch: 'Achu', supper: 'Indomie + boiled egg + vegetables', snacks: '', breakfastIcon: '🥣', lunchIcon: '🍲', supperIcon: '🍜' },
+            Sunday: { breakfast: 'Bread + tea', lunch: 'Broccoli pasta', supper: 'Light soup (large portions)', snacks: '', breakfastIcon: '🍞', lunchIcon: '🍝', supperIcon: '🍲' }
+          },
+          week2: {
+            Monday: { breakfast: 'Spaghetti omelette', lunch: 'Braised porc and miondo', supper: 'Salad or Sunday\'s soup', snacks: '', breakfastIcon: '🍝', lunchIcon: '🥩', supperIcon: '🥗' },
+            Tuesday: { breakfast: 'Bread + peanut butter', lunch: 'Rice and groundnut stew', supper: 'Bobolo and groundnut stew', snacks: '', breakfastIcon: '🍞', lunchIcon: '🍚', supperIcon: '🥜' },
+            Wednesday: { breakfast: 'Bobolo + avocado', lunch: 'Rice and groundnut stew', supper: 'Avocado carrot salad', snacks: '', breakfastIcon: '🥖', lunchIcon: '🍚', supperIcon: '🥗' },
+            Thursday: { breakfast: 'Oats', lunch: 'Sautéed Irish potatoes with meat', supper: 'Same as lunch', snacks: '', breakfastIcon: '🥣', lunchIcon: '🥔', supperIcon: '🥔' },
+            Friday: { breakfast: 'Fried plantain + eggs', lunch: 'Beans & ripe plantain', supper: 'Vegetable omelette', snacks: '', breakfastIcon: '🍌', lunchIcon: '🫘', supperIcon: '🍳' },
+            Saturday: { breakfast: 'BHB', lunch: 'Met de pistache', supper: 'Leftovers', snacks: '', breakfastIcon: '🍳', lunchIcon: '🍲', supperIcon: '🍽️' },
+            Sunday: { breakfast: 'Bread + tea', lunch: 'Leftovers or lasagne', supper: 'Grilled fish du quartier', snacks: '', breakfastIcon: '🍞', lunchIcon: '🍝', supperIcon: '🐟' }
+          },
+          week3: {
+            Monday: { breakfast: 'Rice omelette', lunch: 'Koki beans + plantain', supper: 'Vegetable soup', snacks: '', breakfastIcon: '🍚', lunchIcon: '🫘', supperIcon: '🍲' },
+            Tuesday: { breakfast: 'Bread + omelette', lunch: 'Maquereau à la poêle + bobolo', supper: 'Leftover ekwang', snacks: '', breakfastIcon: '🍞', lunchIcon: '🐟', supperIcon: '🍲' },
+            Wednesday: { breakfast: 'Sweet potatoes + groundnuts', lunch: 'Sautéed garlic shrimps', supper: 'Same as lunch', snacks: '', breakfastIcon: '🍠', lunchIcon: '🦐', supperIcon: '🦐' },
+            Thursday: { breakfast: 'Oats', lunch: 'Bitterleaf soup + fufu', supper: 'Leftover bitterleaf', snacks: '', breakfastIcon: '🥣', lunchIcon: '🥬', supperIcon: '🥬' },
+            Friday: { breakfast: 'Pancakes', lunch: 'Grilled chicken + vegetables', supper: 'Same as lunch', snacks: '', breakfastIcon: '🥞', lunchIcon: '🍗', supperIcon: '🍗' },
+            Saturday: { breakfast: 'Pancakes', lunch: 'Koki plantain', supper: 'Same as lunch', snacks: '', breakfastIcon: '🥞', lunchIcon: '🫘', supperIcon: '🫘' },
+            Sunday: { breakfast: 'Bread + avocado', lunch: 'Ekwang', supper: 'Sautéed vegetables (big portions)', snacks: '', breakfastIcon: '🍞', lunchIcon: '🍲', supperIcon: '🥗' }
+          },
+          week4: {
+            Monday: { breakfast: 'Pap', lunch: 'Ndolé + plantain', supper: 'Same as lunch', snacks: '', breakfastIcon: '🥣', lunchIcon: '🥬', supperIcon: '🥬' },
+            Tuesday: { breakfast: 'Bread + omelette', lunch: 'Okra soup + fufu', supper: 'Leftover okra', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥘', supperIcon: '🥘' },
+            Wednesday: { breakfast: 'Tea', lunch: 'Eru + garri', supper: 'Pepper soup', snacks: '', breakfastIcon: '☕', lunchIcon: '🥬', supperIcon: '🍲' },
+            Thursday: { breakfast: 'Oats', lunch: 'Beans', supper: 'Cucumber salad', snacks: '', breakfastIcon: '🥣', lunchIcon: '🫘', supperIcon: '🥗' },
+            Friday: { breakfast: 'Bread and beans', lunch: 'Fried rice with grilled fish', supper: 'Grilled fish with sautéed vegetables', snacks: '', breakfastIcon: '🍞', lunchIcon: '🍚', supperIcon: '🐟' },
+            Saturday: { breakfast: 'Sardines omelette', lunch: 'Grilled chicken with sautéed vegetables', supper: 'Pepper soup', snacks: '', breakfastIcon: '🐟', lunchIcon: '🍗', supperIcon: '🍲' },
+            Sunday: { breakfast: 'BHB', lunch: 'Sanga', supper: 'Leftovers', snacks: '', breakfastIcon: '🍳', lunchIcon: '🌽', supperIcon: '🍽️' }
+          }
+        },
+        shopping: {
+          staples: [
+            { id: 'cm-rice', name: 'Riz local', amount: '5kg', price: 2500 },
+            { id: 'cm-corn-flour', name: 'Farine de maïs', amount: '2kg', price: 800 },
+            { id: 'cm-plantain', name: 'Plantain', amount: '1 régime', price: 1500 },
+            { id: 'cm-cassava', name: 'Bâton de manioc', amount: '10 pièces', price: 1000 },
+            { id: 'cm-beans', name: 'Haricots', amount: '2kg', price: 1200 }
+          ],
+          proteins: [
+            { id: 'cm-eggs', name: 'Oeufs', amount: '30 oeufs', price: 3000 },
+            { id: 'cm-chicken', name: 'Poulet', amount: '1.5kg', price: 4000 },
+            { id: 'cm-fish', name: 'Poisson (bar)', amount: '1kg', price: 3000 },
+            { id: 'cm-beef', name: 'Viande de boeuf', amount: '500g', price: 2000 }
+          ],
+          vegetables: [
+            { id: 'cm-ndole', name: 'Feuilles de ndolé', amount: '1kg', price: 1500 },
+            { id: 'cm-tomatoes', name: 'Tomates', amount: '2kg', price: 800 },
+            { id: 'cm-onions', name: 'Oignons', amount: '1kg', price: 500 },
+            { id: 'cm-peppers', name: 'Piments', amount: '200g', price: 200 },
+            { id: 'cm-cassava-leaves', name: 'Feuilles de manioc', amount: '500g', price: 400 }
+          ],
+          breakfast: [
+            { id: 'cm-bread', name: 'Pain', amount: '7 baguettes', price: 1750 },
+            { id: 'cm-milk', name: 'Lait en poudre', amount: '400g', price: 2000 },
+            { id: 'cm-coffee', name: 'Café', amount: '200g', price: 1500 }
+          ],
+          basics: [
+            { id: 'cm-palm-oil', name: 'Huile de palme', amount: '1L', price: 1200 },
+            { id: 'cm-groundnuts', name: 'Arachides moulues', amount: '500g', price: 800 },
+            { id: 'cm-spices', name: 'Épices & cube', amount: '1 lot', price: 500 }
+          ]
+        }
       },
       'Egypt': {
         flag: '🇪🇬',
         currency: 'EGP',
+        budget: 1500,
         paymentMethods: [
           { name: 'Vodafone Cash', icon: '💳', color: 'from-red-500 to-red-600', number: '*9#' },
           { name: 'Orange Cash', icon: '🍊', color: 'from-orange-500 to-orange-600', number: '#4444#' }
-        ]
+        ],
+        meals: {
+          Monday: {
+            breakfast: { name: 'Foul Medames + Bread', icon: '🫘', time: '15 min', snack: 'Orange' },
+            lunch: { name: 'Koshari', icon: '🍚', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Grilled Fish + Rice', icon: '🐟', time: '30 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Tilapia fish', amount: '500g', price: 80 },
+                  { name: 'Rice', amount: '400g', price: 20 },
+                  { name: 'Tomatoes', amount: '200g', price: 10 },
+                  { name: 'Onions', amount: '150g', price: 8 },
+                  { name: 'Lemon & spices', amount: 'to taste', price: 10 }
+                ],
+                steps: [
+                  'Clean and season fish with lemon and cumin',
+                  'Grill fish until golden on both sides',
+                  'Cook rice with tomato sauce',
+                  'Prepare onion garnish',
+                  'Serve fish with rice and salad'
+                ]
+              }
+            }
+          },
+          Tuesday: {
+            breakfast: { name: 'Eggs + Feta Cheese + Bread', icon: '🥚', time: '10 min', snack: 'Dates' },
+            lunch: { name: 'Molokhia + Rice + Chicken', icon: '🥬', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Falafel Sandwich', icon: '🧆', time: '20 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Falafel (ready)', amount: '12 pieces', price: 20 },
+                  { name: 'Baladi bread', amount: '4 loaves', price: 4 },
+                  { name: 'Tahini', amount: '100g', price: 15 },
+                  { name: 'Tomatoes & pickles', amount: '200g', price: 10 },
+                  { name: 'Parsley', amount: '1 bunch', price: 5 }
+                ],
+                steps: [
+                  'Warm the falafel',
+                  'Prepare tahini sauce',
+                  'Slice tomatoes and pickles',
+                  'Assemble sandwiches in bread',
+                  'Add tahini and vegetables'
+                ]
+              }
+            }
+          },
+          Wednesday: {
+            breakfast: { name: 'Foul + Taameya', icon: '🫘', time: '15 min', snack: 'Banana' },
+            lunch: { name: 'Mahshi (Stuffed Vegetables)', icon: '🫑', time: '1.5 hrs', snack: '' },
+            dinner: {
+              name: 'Lentil Soup + Bread', icon: '🍲', time: '40 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Red lentils', amount: '300g', price: 15 },
+                  { name: 'Onions', amount: '150g', price: 8 },
+                  { name: 'Tomatoes', amount: '100g', price: 5 },
+                  { name: 'Cumin & lemon', amount: 'to taste', price: 5 },
+                  { name: 'Bread', amount: '4 loaves', price: 4 }
+                ],
+                steps: [
+                  'Wash lentils and boil until soft',
+                  'Fry onions until golden',
+                  'Blend soup until smooth',
+                  'Season with cumin and lemon',
+                  'Serve hot with bread'
+                ]
+              }
+            }
+          },
+          Thursday: {
+            breakfast: { name: 'Eggs + Cheese + Bread', icon: '🥚', time: '10 min', snack: 'Orange' },
+            lunch: { name: 'Kofta + Rice + Salad', icon: '🍖', time: '45 min', snack: '' },
+            dinner: {
+              name: 'Foul + Taameya', icon: '🫘', time: '15 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Foul medames', amount: '400g', price: 15 },
+                  { name: 'Taameya (falafel)', amount: '8 pieces', price: 15 },
+                  { name: 'Bread', amount: '4 loaves', price: 4 },
+                  { name: 'Olive oil', amount: '50ml', price: 10 },
+                  { name: 'Lemon & cumin', amount: 'to taste', price: 5 }
+                ],
+                steps: [
+                  'Heat foul and season with cumin',
+                  'Fry taameya until crispy',
+                  'Drizzle foul with olive oil',
+                  'Serve with warm bread'
+                ]
+              }
+            }
+          },
+          Friday: {
+            breakfast: { name: 'Feteer Meshaltet', icon: '🥧', time: '30 min', snack: 'Dates' },
+            lunch: { name: 'Fattah', icon: '🍖', time: '1.5 hrs', snack: '' },
+            dinner: {
+              name: 'Grilled Chicken + Salad', icon: '🍗', time: '45 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Chicken', amount: '1kg', price: 90 },
+                  { name: 'Onions', amount: '200g', price: 10 },
+                  { name: 'Tomatoes', amount: '200g', price: 10 },
+                  { name: 'Cucumber', amount: '200g', price: 8 },
+                  { name: 'Spices', amount: 'to taste', price: 10 }
+                ],
+                steps: [
+                  'Marinate chicken with spices',
+                  'Grill until golden and cooked',
+                  'Prepare fresh salad',
+                  'Serve with Egyptian bread'
+                ]
+              }
+            }
+          },
+          Saturday: {
+            breakfast: { name: 'Shakshuka', icon: '🍳', time: '20 min', snack: 'Fruit' },
+            lunch: { name: 'Sayadeya (Fish & Rice)', icon: '🐟', time: '1 hr', snack: '' },
+            dinner: {
+              name: 'Koshari', icon: '🍚', time: '30 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Rice', amount: '200g', price: 10 },
+                  { name: 'Macaroni', amount: '200g', price: 10 },
+                  { name: 'Lentils', amount: '150g', price: 8 },
+                  { name: 'Chickpeas', amount: '150g', price: 10 },
+                  { name: 'Tomato sauce & onions', amount: '300g', price: 15 }
+                ],
+                steps: [
+                  'Cook rice, macaroni, lentils separately',
+                  'Prepare spicy tomato sauce',
+                  'Fry onions until crispy',
+                  'Layer ingredients in bowl',
+                  'Top with sauce and fried onions'
+                ]
+              }
+            }
+          },
+          Sunday: {
+            breakfast: { name: 'Foul + Fresh Juice', icon: '🫘', time: '15 min', snack: 'Mango' },
+            lunch: { name: 'Roast Chicken + Rice + Molokhia', icon: '🍗', time: '1.5 hrs', snack: '' },
+            dinner: {
+              name: 'Fiteer Baladi + Honey', icon: '🥧', time: '25 min',
+              recipe: {
+                servings: 4,
+                ingredients: [
+                  { name: 'Flour', amount: '500g', price: 10 },
+                  { name: 'Butter/Ghee', amount: '100g', price: 25 },
+                  { name: 'Honey', amount: '100g', price: 30 },
+                  { name: 'Sugar', amount: '50g', price: 5 },
+                  { name: 'Cheese (optional)', amount: '100g', price: 20 }
+                ],
+                steps: [
+                  'Make dough and let rest',
+                  'Stretch dough very thin',
+                  'Layer with butter/ghee',
+                  'Bake until golden and crispy',
+                  'Serve with honey or cheese'
+                ]
+              }
+            }
+          }
+        },
+        monthlyMealPlan: {
+          week1: {
+            Monday: { breakfast: 'Foul medames', lunch: 'Koshari', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🍚', supperIcon: '' },
+            Tuesday: { breakfast: 'Eggs & cheese', lunch: 'Molokhia with rice', supper: '', snacks: 'Dates', breakfastIcon: '🥚', lunchIcon: '🥬', supperIcon: '' },
+            Wednesday: { breakfast: 'Foul & taameya', lunch: 'Mahshi', supper: 'Lentil soup', snacks: 'Fruit', breakfastIcon: '🫘', lunchIcon: '🫑', supperIcon: '🍲' },
+            Thursday: { breakfast: 'Eggs & bread', lunch: 'Kofta & rice', supper: 'Foul', snacks: 'Orange', breakfastIcon: '🥚', lunchIcon: '🍖', supperIcon: '🫘' },
+            Friday: { breakfast: 'Feteer', lunch: 'Fattah', supper: '', snacks: 'Dates', breakfastIcon: '🥧', lunchIcon: '🍖', supperIcon: '' },
+            Saturday: { breakfast: 'Shakshuka', lunch: 'Sayadeya', supper: 'Koshari', snacks: 'Juice', breakfastIcon: '🍳', lunchIcon: '🐟', supperIcon: '🍚' },
+            Sunday: { breakfast: 'Foul & juice', lunch: 'Roast chicken', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🍗', supperIcon: '' }
+          },
+          week2: {
+            Monday: { breakfast: 'Foul', lunch: 'Grilled fish & rice', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🐟', supperIcon: '' },
+            Tuesday: { breakfast: 'Eggs & feta', lunch: 'Koshari', supper: '', snacks: '', breakfastIcon: '🥚', lunchIcon: '🍚', supperIcon: '' },
+            Wednesday: { breakfast: 'Taameya', lunch: 'Molokhia', supper: '', snacks: 'Fruit', breakfastIcon: '🧆', lunchIcon: '🥬', supperIcon: '' },
+            Thursday: { breakfast: 'Foul', lunch: 'Mahshi', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🫑', supperIcon: '' },
+            Friday: { breakfast: 'Feteer', lunch: 'Fattah', supper: '', snacks: 'Dates', breakfastIcon: '🥧', lunchIcon: '🍖', supperIcon: '' },
+            Saturday: { breakfast: 'Shakshuka', lunch: 'Kofta & salad', supper: '', snacks: 'Juice', breakfastIcon: '🍳', lunchIcon: '🍖', supperIcon: '' },
+            Sunday: { breakfast: 'Foul', lunch: 'Chicken & rice', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🍗', supperIcon: '' }
+          },
+          week3: {
+            Monday: { breakfast: 'Foul & bread', lunch: 'Koshari', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🍚', supperIcon: '' },
+            Tuesday: { breakfast: 'Eggs', lunch: 'Lentil soup', supper: '', snacks: '', breakfastIcon: '🥚', lunchIcon: '🍲', supperIcon: '' },
+            Wednesday: { breakfast: 'Taameya', lunch: 'Molokhia & chicken', supper: '', snacks: '', breakfastIcon: '🧆', lunchIcon: '🥬', supperIcon: '' },
+            Thursday: { breakfast: 'Foul', lunch: 'Sayadeya', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🐟', supperIcon: '' },
+            Friday: { breakfast: 'Feteer', lunch: 'Fattah', supper: '', snacks: 'Dates', breakfastIcon: '🥧', lunchIcon: '🍖', supperIcon: '' },
+            Saturday: { breakfast: 'Shakshuka', lunch: 'Grilled chicken', supper: '', snacks: 'Juice', breakfastIcon: '🍳', lunchIcon: '🍗', supperIcon: '' },
+            Sunday: { breakfast: 'Foul & juice', lunch: 'Kofta & rice', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🍖', supperIcon: '' }
+          },
+          week4: {
+            Monday: { breakfast: 'Foul', lunch: 'Mahshi', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🫑', supperIcon: '' },
+            Tuesday: { breakfast: 'Eggs & cheese', lunch: 'Koshari', supper: '', snacks: '', breakfastIcon: '🥚', lunchIcon: '🍚', supperIcon: '' },
+            Wednesday: { breakfast: 'Taameya', lunch: 'Molokhia', supper: '', snacks: '', breakfastIcon: '🧆', lunchIcon: '🥬', supperIcon: '' },
+            Thursday: { breakfast: 'Foul', lunch: 'Fish & rice', supper: '', snacks: '', breakfastIcon: '🫘', lunchIcon: '🐟', supperIcon: '' },
+            Friday: { breakfast: 'Feteer', lunch: 'Fattah', supper: '', snacks: 'Dates', breakfastIcon: '🥧', lunchIcon: '🍖', supperIcon: '' },
+            Saturday: { breakfast: 'Shakshuka', lunch: 'Kofta', supper: '', snacks: 'Juice', breakfastIcon: '🍳', lunchIcon: '🍖', supperIcon: '' },
+            Sunday: { breakfast: 'Foul', lunch: 'Roast chicken', supper: 'Salad', snacks: '', breakfastIcon: '🫘', lunchIcon: '🍗', supperIcon: '🥗' }
+          }
+        },
+        shopping: {
+          staples: [
+            { id: 'eg-rice', name: 'Rice (Egyptian)', amount: '2kg', price: 40 },
+            { id: 'eg-bread', name: 'Baladi bread', amount: '20 loaves', price: 20 },
+            { id: 'eg-pasta', name: 'Macaroni', amount: '1kg', price: 25 },
+            { id: 'eg-lentils', name: 'Red lentils', amount: '1kg', price: 30 },
+            { id: 'eg-foul', name: 'Foul medames', amount: '1kg', price: 25 }
+          ],
+          proteins: [
+            { id: 'eg-eggs', name: 'Eggs', amount: '30 eggs', price: 90 },
+            { id: 'eg-chicken', name: 'Chicken', amount: '1.5kg', price: 135 },
+            { id: 'eg-fish', name: 'Tilapia', amount: '1kg', price: 80 },
+            { id: 'eg-beef', name: 'Beef (kofta)', amount: '500g', price: 100 }
+          ],
+          vegetables: [
+            { id: 'eg-tomatoes', name: 'Tomatoes', amount: '2kg', price: 20 },
+            { id: 'eg-onions', name: 'Onions', amount: '1kg', price: 15 },
+            { id: 'eg-molokhia', name: 'Molokhia (frozen)', amount: '500g', price: 25 },
+            { id: 'eg-cucumber', name: 'Cucumber', amount: '1kg', price: 15 },
+            { id: 'eg-peppers', name: 'Green peppers', amount: '500g', price: 15 }
+          ],
+          breakfast: [
+            { id: 'eg-cheese', name: 'Feta cheese', amount: '500g', price: 50 },
+            { id: 'eg-tahini', name: 'Tahini', amount: '300g', price: 30 },
+            { id: 'eg-honey', name: 'Honey', amount: '250g', price: 40 }
+          ],
+          basics: [
+            { id: 'eg-oil', name: 'Cooking oil', amount: '1L', price: 45 },
+            { id: 'eg-ghee', name: 'Ghee (samna)', amount: '250g', price: 40 },
+            { id: 'eg-spices', name: 'Cumin & spices', amount: '1 pack', price: 20 }
+          ]
+        }
       }
     };
 
@@ -328,185 +1329,6 @@
       ]
     };
 
-    const mealsData = {
-      Monday: {
-        breakfast: { name: 'Pap (corn porridge) + Groundnuts', icon: '🥣', time: '15 min', snack: 'Orange' },
-        lunch: { name: 'Beans + Sweet Potatoes + Salad', icon: '🫘', time: '45 min', snack: '' },
-        dinner: {
-          name: 'Grilled Fish + Sautéed Vegetables', icon: '🐟', time: '30 min',
-          recipe: {
-            servings: 4,
-            ingredients: [
-              { name: 'Fresh fish', amount: '500g', price: 400 },
-              { name: 'Tomatoes', amount: '300g', price: 45 },
-              { name: 'Onions', amount: '200g', price: 30 },
-              { name: 'Bell pepper', amount: '100g', price: 25 },
-              { name: 'Cooking oil', amount: '2 tbsp', price: 20 }
-            ],
-            steps: [
-              'Clean and season the fish with salt and pepper',
-              'Grill fish on both sides until cooked through',
-              'Dice tomatoes, onions, and peppers',
-              'Heat oil in a pan and sauté vegetables',
-              'Season vegetables with salt and spices',
-              'Serve grilled fish with sautéed vegetables'
-            ]
-          }
-        }
-      },
-      Tuesday: {
-        breakfast: { name: '2 Boiled Eggs + Whole Wheat Bread', icon: '🥚', time: '10 min', snack: 'Banana' },
-        lunch: { name: 'Ndolé (light oil) + Small Plantain', icon: '🥬', time: '45 min', snack: '' },
-        dinner: {
-          name: 'Vegetable Omelette', icon: '🍳', time: '20 min',
-          recipe: {
-            servings: 4,
-            ingredients: [
-              { name: 'Eggs', amount: '6 eggs', price: 90 },
-              { name: 'Cabbage', amount: '200g', price: 35 },
-              { name: 'Onions', amount: '100g', price: 15 },
-              { name: 'Tomatoes', amount: '100g', price: 15 },
-              { name: 'Cooking oil', amount: '1 tbsp', price: 10 }
-            ],
-            steps: [
-              'Chop cabbage and onions finely',
-              'Beat eggs in a bowl with salt',
-              'Mix chopped vegetables into eggs',
-              'Heat oil in a pan',
-              'Pour egg mixture and cook until set',
-              'Flip and cook other side until golden'
-            ]
-          }
-        }
-      },
-      Wednesday: {
-        breakfast: { name: 'Oatmeal (water-based) + Banana', icon: '🥣', time: '10 min', snack: 'Orange' },
-        lunch: { name: 'Okra Soup + Small Garri', icon: '🥘', time: '40 min', snack: '' },
-        dinner: {
-          name: 'Beans Soup (minimal palm oil)', icon: '🫘', time: '50 min',
-          recipe: {
-            servings: 4,
-            ingredients: [
-              { name: 'Dry beans', amount: '500g', price: 100 },
-              { name: 'Palm oil', amount: '1 tbsp', price: 15 },
-              { name: 'Onions', amount: '100g', price: 15 },
-              { name: 'Tomatoes', amount: '200g', price: 30 },
-              { name: 'Pepper', amount: '50g', price: 10 }
-            ],
-            steps: [
-              'Soak beans overnight, then boil until soft',
-              'Heat palm oil in a pot',
-              'Add chopped onions and fry lightly',
-              'Add tomatoes and pepper, cook until soft',
-              'Add cooked beans and water to make soup',
-              'Season with salt and simmer for 20 minutes'
-            ]
-          }
-        }
-      },
-      Thursday: {
-        breakfast: { name: 'Pap + 1 Boiled Egg', icon: '🥣', time: '15 min', snack: 'Small handful groundnuts' },
-        lunch: { name: 'Rice + Vegetable Stew + Dry Fish', icon: '🍚', time: '45 min', snack: '' },
-        dinner: {
-          name: 'Grilled Fish + Steamed Cabbage & Carrots', icon: '🐟', time: '35 min',
-          recipe: {
-            servings: 4,
-            ingredients: [
-              { name: 'Fresh fish', amount: '500g', price: 400 },
-              { name: 'Cabbage', amount: '300g', price: 50 },
-              { name: 'Carrots', amount: '200g', price: 20 },
-              { name: 'Onions', amount: '100g', price: 15 },
-              { name: 'Salt & pepper', amount: 'to taste', price: 5 }
-            ],
-            steps: [
-              'Clean and season fish with salt and pepper',
-              'Grill fish until cooked through on both sides',
-              'Shred cabbage and slice carrots thinly',
-              'Steam vegetables with a little water until tender',
-              'Season steamed vegetables with salt',
-              'Serve grilled fish with steamed vegetables'
-            ]
-          }
-        }
-      },
-      Friday: {
-        breakfast: { name: 'Oatmeal + Orange', icon: '🥣', time: '10 min', snack: 'Banana' },
-        lunch: { name: 'Beans + Boiled Sweet Potatoes', icon: '🫘', time: '50 min', snack: '' },
-        dinner: {
-          name: 'Okra Soup + Small Garri', icon: '🥘', time: '40 min',
-          recipe: {
-            servings: 4,
-            ingredients: [
-              { name: 'Fresh okra', amount: '500g', price: 80 },
-              { name: 'Garri', amount: '200g', price: 50 },
-              { name: 'Palm oil', amount: '1 tbsp', price: 15 },
-              { name: 'Onions', amount: '100g', price: 15 },
-              { name: 'Pepper', amount: '50g', price: 10 },
-              { name: 'Dried fish', amount: '100g', price: 100 }
-            ],
-            steps: [
-              'Wash and slice okra into thin rounds',
-              'Heat palm oil and fry onions',
-              'Add pepper and dried fish',
-              'Add okra and water, cook until slimy',
-              'Season with salt and simmer',
-              'Prepare garri separately and serve with soup'
-            ]
-          }
-        }
-      },
-      Saturday: {
-        breakfast: { name: '2 Boiled Eggs + Banana', icon: '🥚', time: '10 min', snack: 'Orange' },
-        lunch: { name: 'Ndolé + Small Portion Rice', icon: '🥬', time: '50 min', snack: '' },
-        dinner: {
-          name: 'Vegetable Stir-fry + Dry Fish', icon: '🥗', time: '25 min',
-          recipe: {
-            servings: 4,
-            ingredients: [
-              { name: 'Cabbage', amount: '300g', price: 50 },
-              { name: 'Carrots', amount: '200g', price: 20 },
-              { name: 'Onions', amount: '150g', price: 23 },
-              { name: 'Dried fish', amount: '150g', price: 150 },
-              { name: 'Cooking oil', amount: '2 tbsp', price: 20 }
-            ],
-            steps: [
-              'Shred cabbage and slice carrots thinly',
-              'Chop onions and soak dried fish',
-              'Heat oil in a large pan or wok',
-              'Add onions and fry until translucent',
-              'Add carrots and cabbage, stir-fry quickly',
-              'Add dried fish, season, and serve hot'
-            ]
-          }
-        }
-      },
-      Sunday: {
-        breakfast: { name: 'Uji with Groundnuts', icon: '🥣', time: '15 min', snack: 'Banana' },
-        lunch: { name: 'Rice + Ndengu (Leftover)', icon: '🍚', time: '20 min', snack: 'Sweet potato' },
-        dinner: {
-          name: 'Chicken Soup Special', icon: '🍲', time: '1.5 hrs',
-          recipe: {
-            servings: 6,
-            ingredients: [
-              { name: 'Chicken (kienyeji)', amount: '1kg', price: 600 },
-              { name: 'Potatoes', amount: '1kg', price: 100 },
-              { name: 'Carrots', amount: '500g', price: 50 },
-              { name: 'Onions', amount: '200g', price: 30 },
-              { name: 'Tomatoes', amount: '300g', price: 45 },
-              { name: 'Sukuma wiki', amount: '1 bunch', price: 50 }
-            ],
-            steps: [
-              'Cut chicken and boil until very tender',
-              'Add potatoes and carrots to soup',
-              'Fry onions and tomatoes, add to pot',
-              'Simmer until everything is cooked',
-              'Prepare sukuma wiki on the side',
-              'Serve hot with ugali or rice'
-            ]
-          }
-        }
-      }
-    };
 
     // State
     let currentTab = 'chores';
@@ -516,81 +1338,48 @@
     let userData = [];
     let customChores = [];
     let customItems = [];
+    let customRecipes = {};
+    let currentRecipeEdit = null;
     let choreCompletions = {};
     let cartItems = {};
 
-    // Monthly meal plan data
-    const monthlyMealPlan = {
-      week1: {
-        Monday: { breakfast: 'Smoothie mango banana', lunch: 'Braised fish & fish fillet with roasted potatoes', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🐟', supperIcon: '' },
-        Tuesday: { breakfast: 'Tea ginger lemon', lunch: 'Ugali, greens & meat', supper: '', snacks: 'Apples/pear', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
-        Wednesday: { breakfast: 'Smoothie pineapple celery', lunch: 'Chinese cabbage, pak choi & pork', supper: 'Same as lunch', snacks: 'Avocado & carrot salad', breakfastIcon: '🥤', lunchIcon: '🥬', supperIcon: '🥬' },
-        Thursday: { breakfast: 'Smoothie ananas ginger', lunch: 'Githeri', supper: 'Same as lunch', snacks: 'Cashew nuts and tangerine', breakfastIcon: '🥤', lunchIcon: '🍲', supperIcon: '🍲' },
-        Friday: { breakfast: 'Mango chia pudding', lunch: 'Chicken with sautéed vegetables', supper: '', snacks: 'Apple cake', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
-        Saturday: { breakfast: 'Spanish omelette', lunch: 'Rice + stew with peas and minced meat + sautéed carrot and cabbage', supper: 'Avocado', snacks: 'Samosa', breakfastIcon: '🍳', lunchIcon: '🍚', supperIcon: '🥑' },
-        Sunday: { breakfast: 'Pancakes, avocado toast, boiled egg & tea', lunch: 'Grilled fish and plantains', supper: '', snacks: '', breakfastIcon: '🥞', lunchIcon: '🐟', supperIcon: '' }
-      },
-      week2: {
-        Monday: { breakfast: '', lunch: 'Braised fish & fish fillet with roasted potatoes', supper: '', snacks: '', breakfastIcon: '', lunchIcon: '🐟', supperIcon: '' },
-        Tuesday: { breakfast: 'Tea', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
-        Wednesday: { breakfast: 'Smoothie', lunch: 'Chinese cabbage, pak choi & pork', supper: '', snacks: 'Avocado & carrot salad', breakfastIcon: '🥤', lunchIcon: '🥬', supperIcon: '' },
-        Thursday: { breakfast: 'Smoothie', lunch: 'Githeri', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍲', supperIcon: '' },
-        Friday: { breakfast: 'Mango chia pudding', lunch: 'Chicken with sautéed vegetables', supper: '', snacks: 'Apple cake', breakfastIcon: '🥣', lunchIcon: '🍗', supperIcon: '' },
-        Saturday: { breakfast: 'Spanish omelette', lunch: 'Avocado salad', supper: '', snacks: 'Samosa', breakfastIcon: '🍳', lunchIcon: '🥑', supperIcon: '' },
-        Sunday: { breakfast: 'Pancakes & tea', lunch: 'Puff-puff & beans', supper: '', snacks: '', breakfastIcon: '🥞', lunchIcon: '🍩', supperIcon: '' }
-      },
-      week3: {
-        Monday: { breakfast: 'Green smoothie', lunch: 'Broccoli pasta & fried chicken', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍝', supperIcon: '' },
-        Tuesday: { breakfast: '', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '', lunchIcon: '🍲', supperIcon: '' },
-        Wednesday: { breakfast: 'Brewed tea', lunch: 'Chapati, lentils & steamed cabbage', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🫓', supperIcon: '' },
-        Thursday: { breakfast: 'Smoothie', lunch: 'Pilau, banana & kachumbari', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍚', supperIcon: '' },
-        Friday: { breakfast: 'Vegetable smoothie & oat-banana pancake', lunch: 'Chicken stew & rice', supper: '', snacks: 'Mandazi', breakfastIcon: '🥤', lunchIcon: '🍗', supperIcon: '' },
-        Saturday: { breakfast: 'Spanish omelette', lunch: 'Biriyani rice', supper: '', snacks: 'Mandazi', breakfastIcon: '🍳', lunchIcon: '🍚', supperIcon: '' },
-        Sunday: { breakfast: 'Banana bread & tea', lunch: 'Samosa & salad', supper: '', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥟', supperIcon: '' }
-      },
-      week4: {
-        Monday: { breakfast: 'Green smoothie', lunch: 'Samosa & salad', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🥟', supperIcon: '' },
-        Tuesday: { breakfast: 'Tea', lunch: 'Ugali, greens & meat', supper: '', snacks: '', breakfastIcon: '☕', lunchIcon: '🍲', supperIcon: '' },
-        Wednesday: { breakfast: 'Smoothie', lunch: 'Sweet potatoes & butternut squash', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍠', supperIcon: '' },
-        Thursday: { breakfast: 'Smoothie', lunch: 'Pilau, banana & kachumbari', supper: '', snacks: '', breakfastIcon: '🥤', lunchIcon: '🍚', supperIcon: '' },
-        Friday: { breakfast: 'Avocado toast & egg', lunch: 'Plantain & chicken', supper: '', snacks: 'Carrot cake', breakfastIcon: '🥑', lunchIcon: '🍌', supperIcon: '' },
-        Saturday: { breakfast: 'Spanish omelette', lunch: 'Liver salad', supper: '', snacks: 'Mandazi', breakfastIcon: '🍳', lunchIcon: '🥗', supperIcon: '' },
-        Sunday: { breakfast: 'Banana bread & tea', lunch: 'Samosa & salad', supper: 'Salad', snacks: '', breakfastIcon: '🍞', lunchIcon: '🥟', supperIcon: '🥗' }
-      }
-    };
 
-    // Default shopping data
-    const defaultShoppingData = {
-      staples: [
-        { id: 'default-maize-flour', name: 'Maize flour', amount: '2kg', price: 300 },
-        { id: 'default-rice', name: 'Rice', amount: '2kg', price: 400 },
-        { id: 'default-dry-beans', name: 'Dry beans', amount: '2kg', price: 400 },
-        { id: 'default-ndengu', name: 'Ndengu (green grams)', amount: '1kg', price: 300 },
-        { id: 'default-potatoes', name: 'Potatoes', amount: '3kg', price: 300 },
-        { id: 'default-sweet-potatoes', name: 'Sweet potatoes', amount: '3kg', price: 300 }
-      ],
-      proteins: [
-        { id: 'default-eggs', name: 'Eggs', amount: '30 eggs', price: 450 },
-        { id: 'default-omena', name: 'Omena', amount: '500g', price: 300 },
-        { id: 'default-chicken', name: 'Chicken (kienyeji, cut) OR beef bones', amount: '1kg', price: 600 }
-      ],
-      vegetables: [
-        { id: 'default-sukuma', name: 'Sukuma wiki', amount: '3 bunches', price: 150 },
-        { id: 'default-cabbage', name: 'Cabbage', amount: '1 large', price: 150 },
-        { id: 'default-tomatoes', name: 'Tomatoes', amount: '1kg', price: 150 },
-        { id: 'default-onions', name: 'Onions', amount: '1kg', price: 150 },
-        { id: 'default-carrots', name: 'Carrots', amount: '1kg', price: 100 }
-      ],
-      breakfast: [
-        { id: 'default-millet', name: 'Millet/sorghum flour (uji)', amount: '1kg', price: 200 },
-        { id: 'default-bananas', name: 'Bananas', amount: '1 dozen', price: 150 },
-        { id: 'default-groundnuts', name: 'Groundnuts OR peanut butter', amount: '1 pack', price: 200 }
-      ],
-      basics: [
-        { id: 'default-oil', name: 'Cooking oil', amount: 'small', price: 250 },
-        { id: 'default-spices', name: 'Salt & spices', amount: '1 pack', price: 100 }
-      ]
-    };
+    // Helper functions to get country-specific data
+    function getMealsData() {
+      if (!selectedCountry) return {};
+      return countryData[selectedCountry].meals || {};
+    }
+
+    function getMonthlyMealPlan() {
+      if (!selectedCountry) return {};
+      return countryData[selectedCountry].monthlyMealPlan || {};
+    }
+
+    function getShoppingData() {
+      if (!selectedCountry) return { staples: [], proteins: [], vegetables: [], breakfast: [], basics: [] };
+      return countryData[selectedCountry].shopping || { staples: [], proteins: [], vegetables: [], breakfast: [], basics: [] };
+    }
+
+    function getCurrency() {
+      if (!selectedCountry) return 'KES';
+      return countryData[selectedCountry].currency || 'KES';
+    }
+
+    function getBudget() {
+      if (!selectedCountry) return 5000;
+      return countryData[selectedCountry].budget || 5000;
+    }
+
+    function formatPrice(price) {
+      const currency = getCurrency();
+      return `${currency} ${price.toLocaleString()}`;
+    }
+
+    function getCustomRecipe(day, mealType) {
+      if (!selectedCountry) return null;
+      const key = `${selectedCountry}-${day}-${mealType}`;
+      return customRecipes[key] || null;
+    }
 
     // Load data from localStorage
     function loadData() {
@@ -600,6 +1389,7 @@
           const data = JSON.parse(saved);
           customChores = data.customChores || [];
           customItems = data.customItems || [];
+          customRecipes = data.customRecipes || {};
           choreCompletions = data.choreCompletions || {};
           cartItems = data.cartItems || {};
           selectedCountry = data.selectedCountry || null;
@@ -615,6 +1405,7 @@
         localStorage.setItem('homeManagerData', JSON.stringify({
           customChores,
           customItems,
+          customRecipes,
           choreCompletions,
           cartItems,
           selectedCountry
@@ -640,7 +1431,18 @@
       document.getElementById('country-selection').classList.add('hidden');
       document.getElementById('main-content').classList.remove('hidden');
       document.getElementById('country-flag').textContent = countryData[country].flag;
-      renderCurrentView();
+      // Render all views to ensure data is fresh when switching tabs
+      renderAllViews();
+    }
+
+    // Render all views (used when country changes)
+    function renderAllViews() {
+      renderChores();
+      renderMeals();
+      renderShopping();
+      if (currentMealView === 'monthly') {
+        renderMonthlyCalendar();
+      }
     }
 
     function showCountrySelection() {
@@ -769,9 +1571,10 @@
       return [...defaultChores, ...custom];
     }
 
-    // Get items by category
+    // Get items by category (country-specific)
     function getItemsByCategory(category) {
-      const defaultItems = defaultShoppingData[category] || [];
+      const shoppingData = getShoppingData();
+      const defaultItems = shoppingData[category] || [];
       const custom = customItems.filter(i => i.category === category);
       return [...defaultItems, ...custom];
     }
@@ -845,7 +1648,13 @@
     // Render meals
     function renderMeals() {
       const container = document.getElementById('meals-list');
+      const mealsData = getMealsData();
       const dayMeals = mealsData[currentMealDay];
+
+      if (!dayMeals) {
+        container.innerHTML = '<div class="text-center py-8 text-gray-500">Please select a country to view meals</div>';
+        return;
+      }
 
       const mealTypes = [
         { key: 'breakfast', label: 'Breakfast', color: 'from-amber-400 to-orange-400', snackLabel: 'Mid-Morning' },
@@ -896,6 +1705,13 @@
     // Render monthly calendar
     function renderMonthlyCalendar() {
       const container = document.getElementById('monthly-calendar');
+      const monthlyMealPlan = getMonthlyMealPlan();
+
+      if (!monthlyMealPlan || Object.keys(monthlyMealPlan).length === 0) {
+        container.innerHTML = '<div class="text-center py-8 text-gray-500">Please select a country to view monthly meal plan</div>';
+        return;
+      }
+
       const weeks = ['week1', 'week2', 'week3', 'week4'];
       const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 
@@ -979,6 +1795,8 @@
       let grandTotal = 0;
       let inCartCount = 0;
       let totalItems = 0;
+      const currency = getCurrency();
+      const budget = getBudget();
 
       const categories = [
         { key: 'staples', elementId: 'staples-list', priceId: 'staples-price' },
@@ -999,7 +1817,7 @@
           if (bought) inCartCount++;
           categoryTotal += item.price;
           grandTotal += item.price;
-          const isCustom = !item.id.startsWith('default-');
+          const isCustom = item.id.startsWith('custom-');
 
           return `
             <div class="flex items-center gap-3 py-2 border-b border-gray-100 last:border-0 ${bought ? 'ingredient-bought' : ''} cursor-pointer" onclick="toggleIngredient('${item.id}')">
@@ -1010,58 +1828,75 @@
                 <p class="font-medium text-gray-800 text-sm">${item.name}</p>
                 <p class="text-xs text-gray-500">${item.amount}${isCustom ? ' • Custom' : ''}</p>
               </div>
-              <span class="font-semibold text-purple-600 flex-shrink-0 text-sm">KES ${item.price}</span>
+              <span class="font-semibold text-purple-600 flex-shrink-0 text-sm">${currency} ${item.price.toLocaleString()}</span>
             </div>
           `;
         }).join('');
 
-        document.getElementById(priceId).textContent = `KES ${categoryTotal}`;
+        document.getElementById(priceId).textContent = `${currency} ${categoryTotal.toLocaleString()}`;
       });
 
-      document.getElementById('total-price').textContent = `KES ${grandTotal}`;
+      document.getElementById('total-price').textContent = `${currency} ${grandTotal.toLocaleString()}`;
       document.getElementById('cart-count').textContent = `${inCartCount} / ${totalItems}`;
       document.getElementById('cart-progress').style.width = `${totalItems > 0 ? (inCartCount / totalItems) * 100 : 0}%`;
+
+      // Update budget display
+      const budgetText = document.getElementById('budget-text');
+      if (budgetText) {
+        budgetText.textContent = `Budget: ~${currency} ${budget.toLocaleString()}`;
+      }
     }
 
     // Open recipe modal
     function openRecipeModal(day, mealType) {
+      const mealsData = getMealsData();
       const meal = mealsData[day][mealType];
       const modal = document.getElementById('recipe-modal');
       const title = document.getElementById('modal-title');
       const content = document.getElementById('modal-content');
+      const currency = getCurrency();
 
       title.textContent = meal.name;
 
-      if (!meal.recipe) {
+      // Check for custom recipe first
+      const customRecipe = getCustomRecipe(day, mealType);
+      const recipe = customRecipe || meal.recipe;
+
+      if (!recipe) {
         content.innerHTML = `
           <div class="text-center py-8">
             <span class="text-6xl mb-4 block">${meal.icon}</span>
             <h3 class="text-xl font-bold text-gray-800 mb-2">${meal.name}</h3>
-            <p class="text-gray-600 mb-6">No recipe available yet</p>
+            <p class="text-gray-600 mb-4">No recipe available yet</p>
+            <button onclick="openAddRecipeModal('${day}', '${mealType}')" class="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 flex items-center justify-center gap-2 mx-auto">
+              <span>+</span> Add Recipe
+            </button>
           </div>
         `;
       } else {
-        const totalPrice = meal.recipe.ingredients.reduce((sum, ing) => sum + ing.price, 0);
+        const totalPrice = recipe.ingredients.reduce((sum, ing) => sum + ing.price, 0);
+        const isCustom = !!customRecipe;
 
         content.innerHTML = `
           <div class="flex items-center gap-4 mb-4">
             <span class="text-5xl">${meal.icon}</span>
             <div>
-              <p class="text-sm text-gray-500">Servings: ${meal.recipe.servings}</p>
+              <p class="text-sm text-gray-500">Servings: ${recipe.servings}</p>
               <p class="text-sm text-gray-500">Time: ${meal.time}</p>
+              ${isCustom ? '<p class="text-xs text-purple-600 font-semibold">Custom Recipe</p>' : ''}
             </div>
           </div>
 
           <div class="mb-4">
             <div class="flex justify-between items-center mb-2">
               <h4 class="font-bold text-gray-800">Ingredients</h4>
-              <span class="text-sm font-semibold text-purple-600">~KES ${totalPrice}</span>
+              <span class="text-sm font-semibold text-purple-600">~${currency} ${totalPrice.toLocaleString()}</span>
             </div>
             <div class="bg-purple-50 rounded-xl p-3 space-y-2">
-              ${meal.recipe.ingredients.map(ing => `
+              ${recipe.ingredients.map(ing => `
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-700">${ing.name}</span>
-                  <span class="text-gray-500">${ing.amount} · KES ${ing.price}</span>
+                  <span class="text-gray-500">${ing.amount} · ${currency} ${ing.price.toLocaleString()}</span>
                 </div>
               `).join('')}
             </div>
@@ -1070,7 +1905,7 @@
           <div>
             <h4 class="font-bold text-gray-800 mb-2">Instructions</h4>
             <ol class="space-y-2">
-              ${meal.recipe.steps.map((step, i) => `
+              ${recipe.steps.map((step, i) => `
                 <li class="flex gap-3 text-sm">
                   <span class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">${i + 1}</span>
                   <span class="text-gray-700 pt-0.5">${step}</span>
@@ -1078,6 +1913,17 @@
               `).join('')}
             </ol>
           </div>
+
+          ${isCustom ? `
+          <div class="mt-4 pt-4 border-t border-gray-200 flex gap-2">
+            <button onclick="openAddRecipeModal('${day}', '${mealType}')" class="flex-1 py-2 px-4 rounded-xl font-semibold bg-purple-100 text-purple-600 hover:bg-purple-200 transition-colors text-sm">
+              Edit Recipe
+            </button>
+            <button onclick="deleteCustomRecipe('${day}', '${mealType}')" class="py-2 px-4 rounded-xl font-semibold bg-red-100 text-red-600 hover:bg-red-200 transition-colors text-sm">
+              Delete
+            </button>
+          </div>
+          ` : ''}
         `;
       }
 
@@ -1086,6 +1932,159 @@
 
     function closeRecipeModal() {
       document.getElementById('recipe-modal').classList.add('hidden');
+    }
+
+    // Add Recipe Modal functions
+    function openAddRecipeModal(day, mealType) {
+      currentRecipeEdit = { day, mealType };
+      const modal = document.getElementById('add-recipe-modal');
+      const form = document.getElementById('add-recipe-form');
+
+      // Reset form
+      form.reset();
+      document.getElementById('recipe-servings').value = '4';
+
+      // Reset ingredients list to single row
+      const ingredientsList = document.getElementById('ingredients-list');
+      ingredientsList.innerHTML = `
+        <div class="ingredient-row flex gap-2">
+          <input type="text" class="ing-name flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Name" required>
+          <input type="text" class="ing-amount w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Amt" required>
+          <input type="number" class="ing-price w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Price" required>
+        </div>
+      `;
+
+      // Reset steps list to single row
+      const stepsList = document.getElementById('steps-list');
+      stepsList.innerHTML = `
+        <div class="step-row flex gap-2 items-center">
+          <span class="step-num w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">1</span>
+          <input type="text" class="step-text flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Step description" required>
+        </div>
+      `;
+
+      // If editing existing recipe, populate fields
+      const existingRecipe = getCustomRecipe(day, mealType);
+      if (existingRecipe) {
+        document.getElementById('recipe-servings').value = existingRecipe.servings;
+
+        // Populate ingredients
+        ingredientsList.innerHTML = existingRecipe.ingredients.map((ing, i) => `
+          <div class="ingredient-row flex gap-2">
+            <input type="text" class="ing-name flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Name" value="${ing.name}" required>
+            <input type="text" class="ing-amount w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Amt" value="${ing.amount}" required>
+            <input type="number" class="ing-price w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Price" value="${ing.price}" required>
+            ${i > 0 ? '<button type="button" onclick="removeIngredientField(this)" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm hover:bg-red-200 transition-colors">✕</button>' : ''}
+          </div>
+        `).join('');
+
+        // Populate steps
+        stepsList.innerHTML = existingRecipe.steps.map((step, i) => `
+          <div class="step-row flex gap-2 items-center">
+            <span class="step-num w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">${i + 1}</span>
+            <input type="text" class="step-text flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Step description" value="${step}" required>
+            ${i > 0 ? '<button type="button" onclick="removeStepField(this)" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm hover:bg-red-200 transition-colors">✕</button>' : ''}
+          </div>
+        `).join('');
+      }
+
+      closeRecipeModal();
+      modal.classList.remove('hidden');
+    }
+
+    function closeAddRecipeModal() {
+      document.getElementById('add-recipe-modal').classList.add('hidden');
+      currentRecipeEdit = null;
+    }
+
+    function addIngredientField() {
+      const ingredientsList = document.getElementById('ingredients-list');
+      const newRow = document.createElement('div');
+      newRow.className = 'ingredient-row flex gap-2';
+      newRow.innerHTML = `
+        <input type="text" class="ing-name flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Name" required>
+        <input type="text" class="ing-amount w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Amt" required>
+        <input type="number" class="ing-price w-20 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Price" required>
+        <button type="button" onclick="removeIngredientField(this)" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm hover:bg-red-200 transition-colors">✕</button>
+      `;
+      ingredientsList.appendChild(newRow);
+    }
+
+    function removeIngredientField(btn) {
+      btn.closest('.ingredient-row').remove();
+    }
+
+    function addStepField() {
+      const stepsList = document.getElementById('steps-list');
+      const stepCount = stepsList.querySelectorAll('.step-row').length + 1;
+      const newRow = document.createElement('div');
+      newRow.className = 'step-row flex gap-2 items-center';
+      newRow.innerHTML = `
+        <span class="step-num w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 text-white flex items-center justify-center flex-shrink-0 text-xs font-bold">${stepCount}</span>
+        <input type="text" class="step-text flex-1 px-3 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Step description" required>
+        <button type="button" onclick="removeStepField(this)" class="w-8 h-8 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-sm hover:bg-red-200 transition-colors">✕</button>
+      `;
+      stepsList.appendChild(newRow);
+    }
+
+    function removeStepField(btn) {
+      btn.closest('.step-row').remove();
+      // Renumber remaining steps
+      const stepsList = document.getElementById('steps-list');
+      stepsList.querySelectorAll('.step-num').forEach((num, i) => {
+        num.textContent = i + 1;
+      });
+    }
+
+    function handleAddRecipe(event) {
+      event.preventDefault();
+
+      if (!currentRecipeEdit) return;
+
+      const servings = parseInt(document.getElementById('recipe-servings').value);
+
+      // Collect ingredients
+      const ingredientRows = document.querySelectorAll('#ingredients-list .ingredient-row');
+      const ingredients = Array.from(ingredientRows).map(row => ({
+        name: row.querySelector('.ing-name').value.trim(),
+        amount: row.querySelector('.ing-amount').value.trim(),
+        price: parseInt(row.querySelector('.ing-price').value) || 0
+      })).filter(ing => ing.name);
+
+      // Collect steps
+      const stepRows = document.querySelectorAll('#steps-list .step-row');
+      const steps = Array.from(stepRows)
+        .map(row => row.querySelector('.step-text').value.trim())
+        .filter(step => step);
+
+      if (ingredients.length === 0) {
+        showToast('Please add at least one ingredient');
+        return;
+      }
+
+      if (steps.length === 0) {
+        showToast('Please add at least one step');
+        return;
+      }
+
+      // Save recipe
+      const key = `${selectedCountry}-${currentRecipeEdit.day}-${currentRecipeEdit.mealType}`;
+      customRecipes[key] = { servings, ingredients, steps };
+      saveData();
+
+      closeAddRecipeModal();
+      showToast('Recipe saved!');
+
+      // Reopen the recipe modal to show the saved recipe
+      openRecipeModal(currentRecipeEdit.day, currentRecipeEdit.mealType);
+    }
+
+    function deleteCustomRecipe(day, mealType) {
+      const key = `${selectedCountry}-${day}-${mealType}`;
+      delete customRecipes[key];
+      saveData();
+      closeRecipeModal();
+      showToast('Recipe deleted');
     }
 
     // Tips drawer
@@ -1196,6 +2195,7 @@
 
     function renderCustomItems() {
       const container = document.getElementById('custom-items-list');
+      const currency = getCurrency();
 
       if (customItems.length === 0) {
         container.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No custom items yet. Add your first one!</p>';
@@ -1208,7 +2208,7 @@
             <p class="font-semibold text-gray-800 text-sm">${item.name}</p>
             <p class="text-xs text-gray-500">${item.amount} • ${item.category}</p>
           </div>
-          <span class="font-bold text-purple-600 text-sm">KES ${item.price}</span>
+          <span class="font-bold text-purple-600 text-sm">${currency} ${item.price.toLocaleString()}</span>
           <button onclick="deleteItem('${item.id}')" class="w-8 h-8 rounded-full bg-red-100 hover:bg-red-200 text-red-600 flex items-center justify-center transition-colors text-sm">
             ✕
           </button>
@@ -1256,6 +2256,9 @@
 
     function showAddItemForm() {
       document.getElementById('add-item-modal').classList.remove('hidden');
+      // Update price label with current currency
+      const currency = getCurrency();
+      document.getElementById('item-price-label').textContent = `Price (${currency})`;
     }
 
     function closeAddItemModal() {
@@ -1313,9 +2316,10 @@
         document.getElementById('country-selection').classList.add('hidden');
         document.getElementById('main-content').classList.remove('hidden');
         document.getElementById('country-flag').textContent = countryData[selectedCountry].flag;
+        renderAllViews();
+      } else {
+        renderCurrentView();
       }
-
-      renderCurrentView();
     }
 
     initApp();
