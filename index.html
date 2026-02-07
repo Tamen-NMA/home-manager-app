@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Home Manager</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&amp;display=swap" rel="stylesheet">
   <style>
     body {
@@ -61,8 +64,16 @@
      <div class="flex items-center justify-center">
       <h1 id="app-title" class="text-2xl font-extrabold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">Home Manager</h1>
      </div>
-    </header><!-- Floating Action Buttons -->
-    <div class="fixed bottom-6 right-6 flex flex-row gap-3 z-40"><button id="country-flag" onclick="showCountrySelection()" class="w-14 h-14 rounded-full bg-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> 🌍 </button> <button onclick="openPersonalSettings()" class="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> ⚙️ </button> <button onclick="openTipsDrawer()" class="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> 💰 </button>
+    </header><!-- Floating Action Buttons & User Info -->
+    <div class="fixed bottom-6 right-6 flex flex-col items-end gap-3 z-40">
+     <div id="user-info" class="hidden items-center gap-2 bg-white rounded-full px-3 py-2 card-shadow">
+      <img id="user-avatar" class="w-7 h-7 rounded-full" src="" alt="">
+      <span id="user-name" class="text-xs font-semibold text-gray-700 max-w-[80px] truncate"></span>
+      <button onclick="signOutUser()" class="text-xs text-gray-400 hover:text-red-500 transition-colors font-semibold ml-1">✕</button>
+     </div>
+     <div class="flex flex-row gap-3">
+      <button id="country-flag" onclick="showCountrySelection()" class="w-14 h-14 rounded-full bg-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> 🌍 </button> <button onclick="openPersonalSettings()" class="w-14 h-14 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> ⚙️ </button> <button onclick="openTipsDrawer()" class="w-14 h-14 rounded-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white card-shadow flex items-center justify-center text-2xl transition-all transform hover:scale-110"> 💰 </button>
+     </div>
     </div><!-- Tab Navigation -->
     <nav class="flex gap-2 px-4 py-3 flex-shrink-0"><button onclick="switchTab('chores')" id="tab-chores" class="tab-active flex-1 py-2 px-3 rounded-xl font-semibold text-sm transition-all duration-300 flex items-center justify-center gap-2"> <span>🧹</span><span id="chores-tab-text">Chores</span> </button> <button onclick="switchTab('meals')" id="tab-meals" class="flex-1 py-2 px-3 rounded-xl font-semibold text-sm bg-white text-gray-600 transition-all duration-300 flex items-center justify-center gap-2 card-shadow"> <span>🍽️</span><span id="meals-tab-text">Meals</span> </button> <button onclick="switchTab('shopping')" id="tab-shopping" class="flex-1 py-2 px-3 rounded-xl font-semibold text-sm bg-white text-gray-600 transition-all duration-300 flex items-center justify-center gap-2 card-shadow"> <span>🛒</span><span id="shopping-tab-text">Shopping</span> </button>
     </nav><!-- Content Area -->
@@ -150,27 +161,77 @@
       </div>
       <div id="tips-drawer-content" class="p-4 overflow-y-auto space-y-3" style="max-height: calc(85vh - 100px);"></div>
      </div>
-    </div><!-- Password Login Modal -->
-    <div id="password-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
+    </div><!-- Household Setup Modal -->
+    <div id="household-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex items-center justify-center p-4">
      <div class="bg-white rounded-3xl p-6 max-w-md w-full animate-in card-shadow">
-      <div class="text-center mb-6">
-       <div class="text-5xl mb-3">
-        🔒
+      <div id="household-setup-view">
+       <div class="text-center mb-6">
+        <div class="text-5xl mb-3">🏠</div>
+        <h3 class="font-bold text-xl text-gray-800 mb-2">Set Up Your Household</h3>
+        <p class="text-sm text-gray-600">Create a new household or join an existing one</p>
        </div>
-       <h3 class="font-bold text-xl text-gray-800 mb-2">Personal Settings</h3>
-       <p class="text-sm text-gray-600">Enter your password to continue</p>
+       <div class="space-y-3">
+        <button onclick="createHousehold()" class="w-full py-4 px-6 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all transform hover:scale-105 text-left">
+         <div class="flex items-center gap-3">
+          <span class="text-2xl">✨</span>
+          <div>
+           <p class="font-bold">Create Household</p>
+           <p class="text-xs opacity-90 font-normal">Start a new household and invite family</p>
+          </div>
+         </div>
+        </button>
+        <button onclick="showJoinHousehold()" class="w-full py-4 px-6 rounded-xl font-semibold bg-white border-2 border-purple-200 text-gray-700 hover:border-purple-400 transition-all text-left">
+         <div class="flex items-center gap-3">
+          <span class="text-2xl">🔗</span>
+          <div>
+           <p class="font-bold">Join Household</p>
+           <p class="text-xs text-gray-500 font-normal">Enter an invite code from a family member</p>
+          </div>
+         </div>
+        </button>
+       </div>
       </div>
-      <form id="password-form" onsubmit="handlePasswordSubmit(event)" class="space-y-4">
-       <div><label for="password-input" class="block text-sm font-semibold text-gray-700 mb-2">Password</label> <input type="password" id="password-input" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-colors" placeholder="Enter password" required>
+      <div id="household-join-view" class="hidden">
+       <div class="text-center mb-6">
+        <div class="text-5xl mb-3">🔗</div>
+        <h3 class="font-bold text-xl text-gray-800 mb-2">Join Household</h3>
+        <p class="text-sm text-gray-600">Enter the 6-character invite code</p>
        </div>
-       <div id="password-error" class="hidden text-sm text-red-600 text-center bg-red-50 p-2 rounded-lg"></div>
-       <div class="flex gap-3"><button type="button" onclick="closePasswordModal()" class="flex-1 py-3 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"> Cancel </button> <button type="submit" class="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all transform hover:scale-105"> Login </button>
-       </div>
-      </form>
-      <div id="first-time-setup" class="hidden mt-4 pt-4 border-t border-gray-200">
-       <p class="text-xs text-gray-600 text-center mb-3">First time? Set up your password:</p>
-       <form id="setup-form" onsubmit="handleSetupPassword(event)" class="space-y-3"><input type="password" id="setup-password" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Create password" required> <input type="password" id="setup-confirm" class="w-full px-4 py-2 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none text-sm" placeholder="Confirm password" required> <button type="submit" class="w-full py-2 px-4 rounded-xl font-semibold bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white text-sm transition-all"> Set Password </button>
+       <form onsubmit="handleJoinHousehold(event)" class="space-y-4">
+        <input type="text" id="invite-code-input" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none transition-colors text-center text-2xl font-mono tracking-widest uppercase" placeholder="ABC123" maxlength="6" required>
+        <div id="join-error" class="hidden text-sm text-red-600 text-center bg-red-50 p-2 rounded-lg"></div>
+        <div class="flex gap-3">
+         <button type="button" onclick="showHouseholdSetup()" class="flex-1 py-3 px-4 rounded-xl font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors">Back</button>
+         <button type="submit" id="join-btn" class="flex-1 py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all">Join</button>
+        </div>
        </form>
+      </div>
+      <div id="household-created-view" class="hidden">
+       <div class="text-center mb-6">
+        <div class="text-5xl mb-3">🎉</div>
+        <h3 class="font-bold text-xl text-gray-800 mb-2">Household Created!</h3>
+        <p class="text-sm text-gray-600">Share this invite code with your family members</p>
+       </div>
+       <div class="bg-purple-50 rounded-xl p-4 text-center mb-4">
+        <p class="text-3xl font-mono font-bold tracking-widest text-purple-700" id="created-invite-code"></p>
+        <button onclick="copyInviteCode()" class="mt-2 text-sm text-purple-600 hover:text-purple-800 font-semibold">Copy Code</button>
+       </div>
+       <button onclick="closeHouseholdModal()" class="w-full py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all">Get Started</button>
+      </div>
+     </div>
+    </div><!-- Sign-In Required Drawer -->
+    <div id="signin-drawer" class="fixed inset-0 bg-black/50 hidden z-50 flex items-end justify-center">
+     <div class="bg-white w-full max-w-lg rounded-t-3xl animate-in">
+      <div class="flex justify-center pt-3 pb-1"><div class="w-10 h-1 rounded-full bg-gray-300"></div></div>
+      <div class="px-6 pb-8 pt-4 text-center">
+       <div class="text-5xl mb-4">🔒</div>
+       <h3 class="font-bold text-xl text-gray-800 mb-2">Sign in required</h3>
+       <p id="signin-drawer-message" class="text-sm text-gray-600 mb-6">Sign in with your Google account to track your progress and sync with your household.</p>
+       <button onclick="closeSignInDrawer(); signInWithGoogle();" class="w-full py-4 px-6 rounded-2xl font-bold bg-white border-2 border-gray-200 hover:border-purple-400 text-gray-700 transition-all flex items-center justify-center gap-3 card-shadow mb-3">
+        <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+        Sign in with Google
+       </button>
+       <button onclick="closeSignInDrawer()" class="text-sm text-gray-500 hover:text-gray-700 font-semibold transition-colors">Not now</button>
       </div>
      </div>
     </div><!-- Personal Settings Drawer -->
@@ -195,6 +256,10 @@
        </div><!-- Shopping Editor -->
        <div id="shopping-editor" class="hidden space-y-3"><button onclick="showAddItemForm()" class="w-full py-3 px-4 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white transition-all transform hover:scale-105 flex items-center justify-center gap-2"> <span>+</span> Add New Item </button>
         <div id="custom-items-list" class="space-y-2"></div>
+       </div><!-- Household Info -->
+       <div id="household-info" class="mt-4 pt-4 border-t-2 border-gray-200">
+        <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2"><span>🏠</span> Household</h3>
+        <div id="household-details" class="space-y-3"></div>
        </div>
       </div>
      </div>
@@ -272,6 +337,27 @@
    </div>
   </div>
   <script>
+    // ===== Firebase Configuration =====
+    // TODO: Replace with your Firebase project config from Firebase Console
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqDjHKOYIkCHdvTntF8XwwvOGd__-AFjI",
+      authDomain: "home-manager-b88ba.firebaseapp.com",
+      projectId: "home-manager-b88ba",
+      storageBucket: "home-manager-b88ba.firebasestorage.app",
+      messagingSenderId: "428515827991",
+      appId: "1:428515827991:web:5717e64001d429bce65752"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // ===== Auth & Household State =====
+    let currentUser = null;
+    let currentHouseholdId = null;
+    let currentInviteCode = null;
+    let householdMembers = {};
+    let firestoreUnsubscribe = null;
+
     // Country configuration with meals, shopping, and monthly plans
     const countryData = {
       'Kenya': {
@@ -1274,7 +1360,6 @@
     };
 
     let selectedCountry = null;
-    let isAuthenticated = false;
     let currentSettingsTab = 'chores-edit';
 
     // Daily chores (every day)
@@ -1381,8 +1466,8 @@
       return customRecipes[key] || null;
     }
 
-    // Load data from localStorage
-    function loadData() {
+    // Load data from localStorage (used when not logged in, or as fallback)
+    function loadDataFromLocal() {
       try {
         const saved = localStorage.getItem('homeManagerData');
         if (saved) {
@@ -1400,7 +1485,7 @@
     }
 
     // Save data to localStorage
-    function saveData() {
+    function saveDataToLocal() {
       try {
         localStorage.setItem('homeManagerData', JSON.stringify({
           customChores,
@@ -1412,6 +1497,319 @@
         }));
       } catch (e) {
         console.error('Failed to save data', e);
+      }
+    }
+
+    // Unified loadData — loads from Firestore snapshot or localStorage
+    function loadData() {
+      loadDataFromLocal();
+    }
+
+    // Unified saveData — writes to Firestore if authenticated, else localStorage
+    function saveData() {
+      saveDataToLocal();
+      if (currentUser && currentHouseholdId) {
+        saveDataToFirestore();
+      }
+    }
+
+    // Save household data to Firestore
+    function saveDataToFirestore() {
+      if (!currentUser || !currentHouseholdId) return;
+      db.collection('households').doc(currentHouseholdId).update({
+        selectedCountry,
+        customChores,
+        customItems,
+        customRecipes,
+        choreCompletions,
+        cartItems
+      }).catch(e => console.error('Firestore save failed', e));
+    }
+
+    // Apply data from a Firestore snapshot
+    function applyFirestoreData(data) {
+      selectedCountry = data.selectedCountry || selectedCountry;
+      customChores = data.customChores || [];
+      customItems = data.customItems || [];
+      customRecipes = data.customRecipes || {};
+      choreCompletions = data.choreCompletions || {};
+      cartItems = data.cartItems || {};
+      currentInviteCode = data.inviteCode || null;
+      householdMembers = data.members || {};
+      // Also persist to localStorage as cache
+      saveDataToLocal();
+    }
+
+    // Start listening to Firestore household doc
+    function startFirestoreSync(householdId) {
+      if (firestoreUnsubscribe) firestoreUnsubscribe();
+      firestoreUnsubscribe = db.collection('households').doc(householdId)
+        .onSnapshot(doc => {
+          if (!doc.exists) return;
+          const data = doc.data();
+          applyFirestoreData(data);
+          // Re-render the active view
+          if (selectedCountry) {
+            document.getElementById('country-selection').classList.add('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('country-flag').textContent = countryData[selectedCountry].flag;
+            renderAllViews();
+          }
+        }, err => console.error('Firestore listen error', err));
+    }
+
+    function stopFirestoreSync() {
+      if (firestoreUnsubscribe) {
+        firestoreUnsubscribe();
+        firestoreUnsubscribe = null;
+      }
+    }
+
+    // ===== Auth Functions =====
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch(err => {
+        console.error('Sign in failed', err);
+        showToast('Sign in failed. Please try again.');
+      });
+    }
+
+    function signOutUser() {
+      auth.signOut().catch(err => console.error('Sign out failed', err));
+    }
+
+    function updateAuthUI(user) {
+      const userInfo = document.getElementById('user-info');
+
+      if (user) {
+        userInfo.classList.remove('hidden');
+        userInfo.classList.add('flex');
+        document.getElementById('user-avatar').src = user.photoURL || '';
+        document.getElementById('user-name').textContent = user.displayName || user.email;
+      } else {
+        userInfo.classList.add('hidden');
+        userInfo.classList.remove('flex');
+      }
+    }
+
+    function showSignInDrawer(message) {
+      const drawer = document.getElementById('signin-drawer');
+      if (message) {
+        document.getElementById('signin-drawer-message').textContent = message;
+      }
+      drawer.classList.remove('hidden');
+    }
+
+    function closeSignInDrawer() {
+      document.getElementById('signin-drawer').classList.add('hidden');
+    }
+
+    function isLoggedIn() {
+      return !!currentUser;
+    }
+
+    // Auth state listener
+    auth.onAuthStateChanged(async (user) => {
+      currentUser = user;
+      updateAuthUI(user);
+
+      if (user) {
+        // Create/update user doc
+        await db.collection('users').doc(user.uid).set({
+          displayName: user.displayName,
+          email: user.email,
+          photoURL: user.photoURL
+        }, { merge: true });
+
+        // Check if user has a household
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
+
+        if (userData && userData.householdId) {
+          currentHouseholdId = userData.householdId;
+          startFirestoreSync(currentHouseholdId);
+        } else {
+          // Show household setup modal
+          showHouseholdModal();
+        }
+      } else {
+        // Logged out
+        currentHouseholdId = null;
+        currentInviteCode = null;
+        householdMembers = {};
+        stopFirestoreSync();
+        // Keep local data for browsing
+        loadDataFromLocal();
+        renderAllViews();
+      }
+    });
+
+    // ===== Household Functions =====
+    function generateInviteCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = '';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    function showHouseholdModal() {
+      document.getElementById('household-modal').classList.remove('hidden');
+      document.getElementById('household-setup-view').classList.remove('hidden');
+      document.getElementById('household-join-view').classList.add('hidden');
+      document.getElementById('household-created-view').classList.add('hidden');
+    }
+
+    function closeHouseholdModal() {
+      document.getElementById('household-modal').classList.add('hidden');
+    }
+
+    function showJoinHousehold() {
+      document.getElementById('household-setup-view').classList.add('hidden');
+      document.getElementById('household-join-view').classList.remove('hidden');
+      document.getElementById('join-error').classList.add('hidden');
+    }
+
+    function showHouseholdSetup() {
+      document.getElementById('household-join-view').classList.add('hidden');
+      document.getElementById('household-setup-view').classList.remove('hidden');
+    }
+
+    async function createHousehold() {
+      if (!currentUser) return;
+      try {
+        const inviteCode = generateInviteCode();
+        const householdRef = await db.collection('households').add({
+          inviteCode,
+          createdBy: currentUser.uid,
+          memberUids: [currentUser.uid],
+          members: {
+            [currentUser.uid]: {
+              displayName: currentUser.displayName,
+              photoURL: currentUser.photoURL
+            }
+          },
+          selectedCountry: selectedCountry || null,
+          customChores: customChores,
+          customItems: customItems,
+          customRecipes: customRecipes,
+          choreCompletions: choreCompletions,
+          cartItems: cartItems
+        });
+
+        // Create invite code lookup doc
+        await db.collection('inviteCodes').doc(inviteCode).set({
+          householdId: householdRef.id
+        });
+
+        // Update user doc
+        await db.collection('users').doc(currentUser.uid).update({
+          householdId: householdRef.id
+        });
+
+        currentHouseholdId = householdRef.id;
+        currentInviteCode = inviteCode;
+
+        // Show success view
+        document.getElementById('household-setup-view').classList.add('hidden');
+        document.getElementById('household-created-view').classList.remove('hidden');
+        document.getElementById('created-invite-code').textContent = inviteCode;
+
+        startFirestoreSync(householdRef.id);
+      } catch (err) {
+        console.error('Create household failed', err);
+        showToast('Failed to create household');
+      }
+    }
+
+    async function handleJoinHousehold(event) {
+      event.preventDefault();
+      if (!currentUser) return;
+
+      const code = document.getElementById('invite-code-input').value.trim().toUpperCase();
+      const errorEl = document.getElementById('join-error');
+
+      if (code.length !== 6) {
+        errorEl.textContent = 'Please enter a 6-character code';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+
+      try {
+        document.getElementById('join-btn').textContent = 'Joining...';
+
+        // Look up invite code
+        const codeDoc = await db.collection('inviteCodes').doc(code).get();
+        if (!codeDoc.exists) {
+          errorEl.textContent = 'Invalid invite code. Please check and try again.';
+          errorEl.classList.remove('hidden');
+          document.getElementById('join-btn').textContent = 'Join';
+          return;
+        }
+
+        const householdId = codeDoc.data().householdId;
+
+        // Add self to household (security rule allows adding own UID)
+        await db.collection('households').doc(householdId).update({
+          memberUids: firebase.firestore.FieldValue.arrayUnion(currentUser.uid),
+          [`members.${currentUser.uid}`]: {
+            displayName: currentUser.displayName,
+            photoURL: currentUser.photoURL
+          }
+        });
+
+        // Update user doc
+        await db.collection('users').doc(currentUser.uid).update({
+          householdId
+        });
+
+        currentHouseholdId = householdId;
+        closeHouseholdModal();
+        showToast('Joined household successfully!');
+        startFirestoreSync(householdId);
+      } catch (err) {
+        console.error('Join household failed', err);
+        errorEl.textContent = 'Failed to join. Please try again.';
+        errorEl.classList.remove('hidden');
+        document.getElementById('join-btn').textContent = 'Join';
+      }
+    }
+
+    function copyInviteCode() {
+      const code = currentInviteCode || document.getElementById('created-invite-code').textContent;
+      navigator.clipboard.writeText(code).then(() => {
+        showToast('Invite code copied!');
+      }).catch(() => showToast('Failed to copy'));
+    }
+
+    async function leaveHousehold() {
+      if (!currentUser || !currentHouseholdId) return;
+      if (!confirm('Are you sure you want to leave this household?')) return;
+
+      try {
+        // Remove self from household
+        await db.collection('households').doc(currentHouseholdId).update({
+          memberUids: firebase.firestore.FieldValue.arrayRemove(currentUser.uid),
+          [`members.${currentUser.uid}`]: firebase.firestore.FieldValue.delete()
+        });
+
+        // Clear user's household reference
+        await db.collection('users').doc(currentUser.uid).update({
+          householdId: firebase.firestore.FieldValue.delete()
+        });
+
+        stopFirestoreSync();
+        currentHouseholdId = null;
+        currentInviteCode = null;
+        householdMembers = {};
+
+        closeSettingsDrawer();
+        showToast('Left household');
+        showHouseholdModal();
+      } catch (err) {
+        console.error('Leave household failed', err);
+        showToast('Failed to leave household');
       }
     }
 
@@ -1546,6 +1944,10 @@
 
     // Toggle chore completion
     function toggleChore(choreId, day) {
+      if (!isLoggedIn()) {
+        showSignInDrawer('Sign in to track your chores and sync with your household.');
+        return;
+      }
       const key = `${choreId}-${day}`;
       choreCompletions[key] = !choreCompletions[key];
       saveData();
@@ -1559,6 +1961,10 @@
 
     // Toggle cart item
     function toggleIngredient(itemId) {
+      if (!isLoggedIn()) {
+        showSignInDrawer('Sign in to track your shopping list and sync with your household.');
+        return;
+      }
       cartItems[itemId] = !cartItems[itemId];
       saveData();
       renderShopping();
@@ -2038,7 +2444,7 @@
 
     function handleAddRecipe(event) {
       event.preventDefault();
-
+      if (!isLoggedIn()) { showSignInDrawer('Sign in to save your custom recipes.'); return; }
       if (!currentRecipeEdit) return;
 
       const servings = parseInt(document.getElementById('recipe-servings').value);
@@ -2139,6 +2545,10 @@
 
     // Settings functions
     function openPersonalSettings() {
+      if (!isLoggedIn()) {
+        showSignInDrawer('Sign in to access settings and manage your household.');
+        return;
+      }
       openSettingsDrawer();
     }
 
@@ -2146,6 +2556,7 @@
       document.getElementById('settings-drawer').classList.remove('hidden');
       renderCustomChores();
       renderCustomItems();
+      renderHouseholdInfo();
     }
 
     function closeSettingsDrawer() {
@@ -2216,6 +2627,39 @@
       `).join('');
     }
 
+    function renderHouseholdInfo() {
+      const container = document.getElementById('household-details');
+      if (!currentUser || !currentHouseholdId) {
+        container.innerHTML = '<p class="text-sm text-gray-500">Not connected to a household.</p>';
+        return;
+      }
+
+      const memberList = Object.entries(householdMembers).map(([uid, member]) => `
+        <div class="flex items-center gap-2">
+          <img src="${member.photoURL || ''}" class="w-6 h-6 rounded-full" alt="" onerror="this.style.display='none'">
+          <span class="text-sm text-gray-700">${member.displayName || 'Member'}</span>
+          ${uid === currentUser.uid ? '<span class="text-xs text-purple-600 font-semibold">(You)</span>' : ''}
+        </div>
+      `).join('');
+
+      container.innerHTML = `
+        <div class="bg-purple-50 rounded-xl p-3 mb-3">
+          <p class="text-xs text-gray-600 mb-1 font-semibold">Invite Code</p>
+          <div class="flex items-center justify-between">
+            <p class="text-xl font-mono font-bold tracking-widest text-purple-700">${currentInviteCode || '------'}</p>
+            <button onclick="copyInviteCode()" class="text-xs bg-purple-200 text-purple-700 px-3 py-1 rounded-lg font-semibold hover:bg-purple-300 transition-colors">Copy</button>
+          </div>
+        </div>
+        <div class="space-y-2 mb-3">
+          <p class="text-xs text-gray-600 font-semibold">Members</p>
+          ${memberList || '<p class="text-sm text-gray-500">No members yet</p>'}
+        </div>
+        <button onclick="leaveHousehold()" class="w-full py-2 px-4 rounded-xl font-semibold bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-sm border border-red-200">
+          Leave Household
+        </button>
+      `;
+    }
+
     function showAddChoreForm() {
       document.getElementById('add-chore-modal').classList.remove('hidden');
     }
@@ -2226,6 +2670,7 @@
 
     function handleAddChore(event) {
       event.preventDefault();
+      if (!isLoggedIn()) { showSignInDrawer('Sign in to add custom chores.'); return; }
 
       const task = document.getElementById('chore-task').value;
       const icon = document.getElementById('chore-icon').value;
@@ -2267,6 +2712,7 @@
 
     function handleAddItem(event) {
       event.preventDefault();
+      if (!isLoggedIn()) { showSignInDrawer('Sign in to add custom shopping items.'); return; }
 
       const name = document.getElementById('item-name').value;
       const amount = document.getElementById('item-amount').value;
@@ -2308,9 +2754,19 @@
       if (e.target.id === 'settings-drawer') closeSettingsDrawer();
     });
 
+    document.getElementById('signin-drawer').addEventListener('click', (e) => {
+      if (e.target.id === 'signin-drawer') closeSignInDrawer();
+    });
+
     // Initialize app
+    // Close household modal on backdrop click
+    document.getElementById('household-modal').addEventListener('click', (e) => {
+      // Don't close on backdrop click — force user to make a choice
+    });
+
     function initApp() {
-      loadData();
+      // Load local data first (for browse-only or as cache)
+      loadDataFromLocal();
 
       if (selectedCountry) {
         document.getElementById('country-selection').classList.add('hidden');
@@ -2320,6 +2776,7 @@
       } else {
         renderCurrentView();
       }
+      // Firebase auth will handle the rest via onAuthStateChanged
     }
 
     initApp();
